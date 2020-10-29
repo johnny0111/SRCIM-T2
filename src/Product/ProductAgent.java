@@ -31,11 +31,11 @@ public class ProductAgent extends Agent {
         // TO DO: Add necessary behaviour/s for the product to control the flow
         // of its own production 
         
-        //@Amaral
-        ACLMessage msg = new ACLMessage(ACLMessage.CFP); //CALL FOR PROPOSALS //TODO acho que é esta que se tem que mudar
-        msg.addReceiver(new AID("responder", false));
-        this.addBehaviour(new initiator(this,msg));
-        //System.out.println(msg.toString());
+//        //@Amaral
+//        ACLMessage msg = new ACLMessage(ACLMessage.CFP); //CALL FOR PROPOSALS //TODO acho que é esta que se tem que mudar
+//        msg.addReceiver(new AID("responder", false));
+//        this.addBehaviour(new initiator(this,msg));
+//        //System.out.println(msg.toString());
         
         
     }
@@ -58,24 +58,24 @@ public class ProductAgent extends Agent {
     //@Amaral aka Jade tutorial
         
     //Meaning to do a first CFP
-    private class initiator extends ContractNetInitiator{
-        public initiator(Agent a, ACLMessage msg){
-            super (a,msg);
-        }
-
-        @Override
-        protected void handleInform(ACLMessage inform){
-            System.out.println(myAgent.getLocalName() + ": Inform message received");
-        }
-
-        //@Override
-        protected void hadleAllResponses (Vector responses, Vector acceptances){
-            System.out.println(myAgent.getLocalName() + ":All PROPOSALS received");
-            ACLMessage auxMsg = (ACLMessage)responses.get(0);
-            ACLMessage reply = auxMsg.createReply();
-            reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-            acceptances.add(reply);
-        }
-    }
+//    private class initiator extends ContractNetInitiator{
+//        public initiator(Agent a, ACLMessage msg){
+//            super (a,msg);
+//        }
+//
+//        @Override
+//        protected void handleInform(ACLMessage inform){
+//            System.out.println(myAgent.getLocalName() + ": Inform message received");
+//        }
+//
+//        //@Override
+//        protected void hadleAllResponses (Vector responses, Vector acceptances){
+//            System.out.println(myAgent.getLocalName() + ":All PROPOSALS received");
+//            ACLMessage auxMsg = (ACLMessage)responses.get(0);
+//            ACLMessage reply = auxMsg.createReply();
+//            reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//            acceptances.add(reply);
+//        }
+//    }
         
 }
