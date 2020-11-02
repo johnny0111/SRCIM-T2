@@ -12,6 +12,11 @@ import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetResponder;
+
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAException;
+import jade.domain.DFService;
         /**
  *
  * @author Ricardo Silva Peres <ricardo.peres@uninova.pt>
@@ -48,7 +53,22 @@ public class ResourceAgent extends Agent {
         System.out.println("Resource Deployed: " + this.id + " Executes: " + Arrays.toString(associatedSkills));
 
         //TO DO: Register in DF with the corresponding skills as services
-
+        //A inscrição no DF deve ser o primeiro passo a ser executado por um agente, para que este possa ser
+        //procurado pelos outros agentes presentes na plataforma. 
+        
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(this.getAID());
+        ServiceDescription sd = new ServiceDescription(); // Pointless? It's just the description
+        sd.setType("tutorial");
+        sd.setName( getLocalName() );
+        dfd.addServices(sd);
+        try{
+            DFService.register(this,  dfd);
+            System.out.println("Registered " + getLocalName() + " in DF");
+        }catch (FIPAException ex) {
+            Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE,null,ex); //In tutorial it was Tutorial Agent
+        }
+        
 
         // TO DO: Add responder behaviour/s
 
@@ -73,7 +93,7 @@ public class ResourceAgent extends Agent {
 
             ACLMessage msg = cfp.createReply();
             msg.setPerformative(ACLMessage.PROPOSE);
-            msg.setContent("My Proposal Value aka I'm FREE");
+            msg.setContent("My Proposal Value");
             return msg;
 
         }
