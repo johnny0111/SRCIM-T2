@@ -20,12 +20,12 @@ import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import java.util.Enumeration;
 
+import Utilities.Constants;
+
 /**
  *
  * @author Ricardo Silva Peres <ricardo.peres@uninova.pt>
  */
-
-// -gui GUI:Utilities.ConsoleAgent();
 
 public class ProductAgent extends Agent {    
     
@@ -55,6 +55,7 @@ public class ProductAgent extends Agent {
         for(int i=0; i < executionPlan.size(); i++){
             //next skill -> search in DF
             sb.addSubBehaviour(new search_resource_InDF(this));
+            this.addBehaviour(sb);
             
         }
         
@@ -102,8 +103,9 @@ public class ProductAgent extends Agent {
                     ACLMessage msg = (ACLMessage)e.nextElement();
                     
                     if(msg.getPerformative() == ACLMessage.PROPOSE){
+                        
                         ACLMessage reply = msg.createReply();
-                        reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                        reply.setPerformative(ACLMessage.REJECT_PROPOSAL); //Default = reject
                         acceptances.addElement(reply);
                         
                         int proposal = Integer.parseInt(msg.getContent()); // to define in RA (can be a random)
@@ -112,6 +114,9 @@ public class ProductAgent extends Agent {
                             bestProposer = msg.getSender();
                             accept = reply;
                         }
+//                        if (proposal == bestProposal){
+//                            System.out.println();
+//                        }
                     }
                     else{
                         System.out.println("(CFP) REFUSE received from: " + msg.getSender().getName());
@@ -149,38 +154,39 @@ public class ProductAgent extends Agent {
         super(a);
     }
 
-    @Override
-    public void action() {
-        
-        DFAgentDescription[] available_agents = null;
-        
-        try {
-            
-            System.out.println("Looking for resource: " + executionPlan.get(execution_step));
-            available_agents = DFInteraction.SearchInDFByName(executionPlan.get(execution_step),myAgent);
-            //available_agents = DFInteraction.SearchInDFByType(executionPlan.get(execution_step),myAgent);
-        
-        } catch (FIPAException ex){
-            Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        if(available_agents != null){
-            //perform cfp
-            ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
-            
-            for(int i=0; i < available_agents.length; i++){
-                cfp.addReceiver(available_agents[i].getName());
-                System.out.println("Sent msg nr=" + i + " to agent" + available_agents[i].getName() + "(CFP) ");
+        @Override
+        public void action() {
+
+            DFAgentDescription[] available_agents = null;
+
+            try {
+
+                System.out.println("Looking for resource: " + executionPlan.get(execution_step));
+                available_agents = DFInteraction.SearchInDFByName(executionPlan.get(execution_step),myAgent);
+                //available_agents = DFInteraction.SearchInDFByType(executionPlan.get(execution_step),myAgent);
+
+            } catch (FIPAException ex){
+                Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
+                if(Constants.DEBUG) System.out.println("ERRO Looking for resource: " + executionPlan.get(execution_step));
             }
-            
-            myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
+
+            if(available_agents != null){
+                //perform cfp
+                ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
+
+                for(int i=0; i < available_agents.length; i++){
+                    cfp.addReceiver(available_agents[i].getName());
+                    System.out.println("Sent msg nr=" + i + " to agent" + available_agents[i].getName() + "(CFP) ");
+                }
+
+                myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
+            }
+
+            else{
+                System.out.println("Couldn't find resource: " + executionPlan.get(execution_step));
+            }
+
         }
-        
-        else{
-            System.out.println("Couldn't find resource: " + executionPlan.get(execution_step));
-        }
-        
-    }
 }
     //*****************************
     

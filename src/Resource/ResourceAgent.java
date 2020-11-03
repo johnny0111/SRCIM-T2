@@ -19,6 +19,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAException;
 import jade.domain.DFService;
+import java.util.Set;
         /**
  *
  * @author Ricardo Silva Peres <ricardo.peres@uninova.pt>
@@ -101,7 +102,8 @@ public class ResourceAgent extends Agent {
 
             ACLMessage msg = cfp.createReply();
             msg.setPerformative(ACLMessage.PROPOSE);
-            msg.setContent("My Proposal Value");
+            
+            
             return msg;
 
         }
@@ -112,6 +114,10 @@ public class ResourceAgent extends Agent {
             block(2000);
             ACLMessage msg = cfp.createReply();
             msg.setPerformative(ACLMessage.INFORM);
+            String debug1 = Integer.toString((int) Math.random()); //Random because we need them to be different, so we can chose, and tell them appart;
+            System.out.println(debug1);
+            msg.setContent( debug1);
+            
             return msg;
         }
 
