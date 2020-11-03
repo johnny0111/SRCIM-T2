@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import Libraries.IResource;
+import Utilities.Constants;
+import Utilities.DFInteraction;
 
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
@@ -56,23 +58,29 @@ public class ResourceAgent extends Agent {
         //A inscrição no DF deve ser o primeiro passo a ser executado por um agente, para que este possa ser
         //procurado pelos outros agentes presentes na plataforma. 
         
-        DFAgentDescription dfd = new DFAgentDescription();
-        dfd.setName(this.getAID());
-        ServiceDescription sd = new ServiceDescription(); // Pointless? It's just the description
-        sd.setType("tutorial");
-        sd.setName( getLocalName() );
-        dfd.addServices(sd);
-        try{
-            DFService.register(this,  dfd);
-            System.out.println("Registered " + getLocalName() + " in DF");
-        }catch (FIPAException ex) {
-            Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE,null,ex); //In tutorial it was Tutorial Agent
-        }
+//        DFAgentDescription dfd = new DFAgentDescription();
+//        dfd.setName(this.getAID());
+//        ServiceDescription sd = new ServiceDescription(); // Pointless? It's just the description
+//        sd.setType("dfservice_resource");
+//        sd.setName( getLocalName() );
+//        dfd.addServices(sd);
+//        try{
+//            DFService.register(this,  dfd);
+//            System.out.println("Registered " + getLocalName() + " in DF\n"+ this.description);
+//        }catch (FIPAException ex) {
+//            Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE,null,ex); //In tutorial it was Tutorial Agent
+//        }
         
+        
+        try {
+           
+            DFInteraction.RegisterInDF(this,this.associatedSkills,"dfservice_resource"); //DFInteraction.RegisterInDF(this, associatedSkills, id);
+            if(Constants.DEBUG)System.out.println("Registered in DF " + this.getLocalName() + "SKILLS " + Arrays.toString(this.associatedSkills));
+        } catch (FIPAException ex) {
+            Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         // TO DO: Add responder behaviour/s
-
-
         
         //@Amaral
         this.addBehaviour(new responder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));

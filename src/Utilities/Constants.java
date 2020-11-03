@@ -9,6 +9,8 @@ import java.util.Arrays;
  */
 public class Constants {
     
+    
+    public static final boolean DEBUG = true;
     //DF Services
     public static final String DFSERVICE_TRANSPORT = "dfservice_transport";
     public static final String DFSERVICE_PRODUCT = "dfservice_product";
