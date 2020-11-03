@@ -1,39 +1,41 @@
 package Product;
 
 import jade.core.Agent;
-import java.util.ArrayList;
-
-import jade.core.AID;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.proto.ContractNetInitiator;
+import java.util.ArrayList;
 import java.util.Vector;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 //@HJ
 import Utilities.DFInteraction;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.OneShotBehaviour;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAException;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author Ricardo Silva Peres <ricardo.peres@uninova.pt>
  */
+
+// -gui GUI:Utilities.ConsoleAgent();
+
 public class ProductAgent extends Agent {    
     
     String id;
     ArrayList<String> executionPlan = new ArrayList<>();
     // TO DO: Add remaining attributes required for your implementation
     
-     // @HJ
+    // @HJ
     String current_location, next_location;
     int execution_step;
-    
     
     @Override
     protected void setup() {
@@ -42,8 +44,6 @@ public class ProductAgent extends Agent {
         this.executionPlan = this.getExecutionList((String) args[1]);
         System.out.println("Product launched: " + this.id + " Requires: " + executionPlan);
         
-        
-        
         // TO DO: Add necessary behaviour/s for the product to control the flow
         // of its own production 
         
@@ -51,12 +51,12 @@ public class ProductAgent extends Agent {
         // é preciso registar no DF? Acho que como é o PA (não é procurado por outros) não é preciso
         this.execution_step = 0;
         
-        //@Amaral
-        ACLMessage msg = new ACLMessage(ACLMessage.CFP); //CALL FOR PROPOSALS //TODO acho que é esta que se tem que mudar
-        msg.addReceiver(new AID("responder", false)); // AID -> Agent ID
-        //this.addBehaviour(new initiator(this,msg));
-        //System.out.println(msg.toString());
-        
+        SequentialBehaviour sb = new SequentialBehaviour();
+        for(int i=0; i < executionPlan.size(); i++){
+            //next skill -> search in DF
+            sb.addSubBehaviour(new search_resource_InDF(this));
+            
+        }
         
     }
 
@@ -73,31 +73,7 @@ public class ProductAgent extends Agent {
         }
         return null;
     }
-    
-    
-//    @Amaral aka Jade tutorial -  All from Tutorial dw.
-//        
-//    Meaning to do a first CFP - Working as a ResponderAgent ContractNetResponder
-//    private class initiator extends ContractNetInitiator{
-//        public initiator(Agent a, ACLMessage msg){
-//            super (a,msg);
-//        }
-//
-//        @Override
-//        protected void handleInform(ACLMessage inform){
-//            System.out.println(myAgent.getLocalName() + ": Inform message received");
-//        }
-//
-//        @Override
-//        protected void handleAllResponses (Vector responses, Vector acceptances){
-//            System.out.println(myAgent.getLocalName() + ":All PROPOSALS received");
-//            ACLMessage auxMsg = (ACLMessage)responses.get(0);
-//            ACLMessage reply = auxMsg.createReply();
-//            reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-//            acceptances.add(reply);
-//        }
-//    }
-//        
+
     //@HJ
     //Referência: http://www.iro.umontreal.ca/~dift6802/jade/src/examples/protocols/ContractNetInitiatorAgent.java
     private class CNinitiator extends ContractNetInitiator{
@@ -169,42 +145,43 @@ public class ProductAgent extends Agent {
     //Search RA in DF
     private class search_resource_InDF extends OneShotBehaviour {
         
-        public search_resource_InDF(Agent a){
-            super(a);
-        }
-
-        @Override
-        public void action() {
-
-            DFAgentDescription[] available_agents = null;
-
-            try {
-
-                System.out.println("Looking for resource: " + executionPlan.get(execution_step));
-                available_agents = DFInteraction.SearchInDFByName(executionPlan.get(execution_step),myAgent);
-
-            } catch (FIPAException ex){
-                Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-            if(available_agents != null){
-                //perform cfp
-                ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
-
-                for(int i=0; i < available_agents.length; i++){
-                    cfp.addReceiver(available_agents[i].getName());
-                    System.out.println("Sent msg nr=" + i + " to agent" + available_agents[i].getName() + "(CFP) ");
-                }
-
-                myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
-            }
-
-            else{
-                System.out.println("Couldn't find resource: " + executionPlan.get(execution_step));
-            }
-
-        }
+    public search_resource_InDF(Agent a){
+        super(a);
     }
+
+    @Override
+    public void action() {
+        
+        DFAgentDescription[] available_agents = null;
+        
+        try {
+            
+            System.out.println("Looking for resource: " + executionPlan.get(execution_step));
+            available_agents = DFInteraction.SearchInDFByName(executionPlan.get(execution_step),myAgent);
+            //available_agents = DFInteraction.SearchInDFByType(executionPlan.get(execution_step),myAgent);
+        
+        } catch (FIPAException ex){
+            Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        if(available_agents != null){
+            //perform cfp
+            ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
+            
+            for(int i=0; i < available_agents.length; i++){
+                cfp.addReceiver(available_agents[i].getName());
+                System.out.println("Sent msg nr=" + i + " to agent" + available_agents[i].getName() + "(CFP) ");
+            }
+            
+            myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
+        }
+        
+        else{
+            System.out.println("Couldn't find resource: " + executionPlan.get(execution_step));
+        }
+        
+    }
+}
     //*****************************
     
 }
