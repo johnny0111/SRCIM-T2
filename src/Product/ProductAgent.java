@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jade.proto.AchieveREInitiator;
 
 //@HJ
 import Utilities.DFInteraction;
@@ -148,6 +149,19 @@ public class ProductAgent extends Agent {
     
     //***************************** @Henrique Joaquim
     //Search RA in DF
+    private class FIPAinitiator extends AchieveREInitiator{
+        public FIPAinitiator(Agent a, ACLMessage msg){
+            super(a, msg);
+        }
+        @Override
+        protected void handleAgree(ACLMessage agree){
+            System.out.println(myAgent.getLocalName() + ": AGREE message received");
+        }
+        @Override
+        protected void handleInform(ACLMessage inform){
+            System.out.println(myAgent.getLocalName() + ": INFORM message received");
+        }
+    }
     private class search_resource_InDF extends OneShotBehaviour {
         
     public search_resource_InDF(Agent a){
