@@ -15,9 +15,11 @@ import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.proto.AchieveREResponder;
+import Libraries.ITransport;
 /**
  *
- * @author Ricardo Silva Peres <ricardo.peres@uninova.pt>
+ * @prof: Ricardo Silva Peres <ricardo.peres@uninova.pt>
+ * @authors: Henrique Joaquim, Joao Carvalho & Pedro Amaral
  */
 public class TransportAgent extends Agent {
 
@@ -26,12 +28,18 @@ public class TransportAgent extends Agent {
     String description;
     String[] associatedSkills;
     
+    //@HJ
+    String initial_position, dest_position;
+    boolean isAvailable;
+    
 
     @Override
     protected void setup() {
         Object[] args = this.getArguments();
         this.id = (String) args[0];
         this.description = (String) args[1];
+        this.isAvailable=true;
+        
 
         //Load hw lib
         try {
@@ -41,6 +49,7 @@ public class TransportAgent extends Agent {
             instance = cls.newInstance();
             myLib = (ITransport) instance;
             System.out.println(instance);
+        
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(TransportAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -49,18 +58,26 @@ public class TransportAgent extends Agent {
         this.associatedSkills = myLib.getSkills();
         System.out.println("Transport Deployed: " + this.id + " Executes: " + Arrays.toString(associatedSkills));
         
+        //Register in DF
         try {
-           
-            DFInteraction.RegisterInDF(this,this.associatedSkills,"dfservice_resource"); //DFInteraction.RegisterInDF(this, associatedSkills, id);
-            if(Constants.DEBUG)System.out.println("Registered in DF " + this.getLocalName() + "SKILLS " + Arrays.toString(this.associatedSkills));
+            DFInteraction.RegisterInDF(this,this.associatedSkills,Constants.DFSERVICE_RESOURCE); //DFInteraction.RegisterInDF(this, associatedSkills, id);
+            if(Constants.DEBUG)System.out.println("Registered in DF " + this.getLocalName() + "SKILLS:" + Arrays.toString(this.associatedSkills));
+        
         } catch (FIPAException ex) {
             Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
+        // Responder behaviour/s
         this.addBehaviour(new TransportAgent.responder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
-        // TO DO: Register in DF
-        // TO DO: Add responder behaviour/s
+       
+        
     }
     
+    @Override
+    protected void takeDown() {
+        super.takeDown();
+    }
+    
+    //**** FIPA REQUEST ACHIEVE RESPONDER
         public class responder extends AchieveREResponder {
         
         public responder(Agent a, MessageTemplate mt){
@@ -68,24 +85,46 @@ public class TransportAgent extends Agent {
         }
         @Override
         protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException{
-            System.out.println(myAgent.getLocalName() + ": Processing REQUEST message");
+            System.out.println(myAgent.getLocalName() + "(TA): Received Transportation Request from: " + request.getSender().getName());
             ACLMessage msg = request.createReply();
-            msg.setPerformative(ACLMessage.AGREE);
+            
+            if(isAvailable){
+                //@HJ
+                // tenho que ver como se enviam estas variaveis no PA
+                // initial position
+                // destination position
+                
+                isAvailable=false;
+                
+                msg.setPerformative(ACLMessage.AGREE);
+                System.out.println(myAgent.getLocalName() + "(TA): sent AGREE to: " + request.getSender().getName());
+
+            }else{
+                msg.setPerformative(ACLMessage.REFUSE);
+                System.out.println(myAgent.getLocalName() + "(TA): sent REFUSE to: " + request.getSender().getName());
+
+            }
+            
             return msg;
         }
+        
         @Override
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException{
-            System.out.println(myAgent.getLocalName() + ": Preparing results of REQUEST");
-            block(5000);
+            System.out.println(myAgent.getLocalName() + ": Preparing results of transportation REQUEST");
+            
+            //@HJ
+            //ver isto (no código do Pedro está assim mas a função que está
+            //definida em ITranspor.java só tem 2 argumentos de entrada
+            //myLib.executeMove(initial_position, dest_position, id);
+            
             ACLMessage msg = request.createReply();
             msg.setPerformative(ACLMessage.INFORM);
+            
+            System.out.println(myAgent.getLocalName() + " (TA): Performed MOVE operation to: " + request.getSender());
+            isAvailable = true;
+            
             return msg;
         }
     }
-   
-
-    @Override
-    protected void takeDown() {
-        super.takeDown();
-    }
+  
 }

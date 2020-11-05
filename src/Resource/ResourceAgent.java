@@ -76,7 +76,7 @@ public class ResourceAgent extends Agent {
         
         
         try {
-            DFInteraction.RegisterInDF(this,this.associatedSkills,"dfservice_resource"); //DFInteraction.RegisterInDF(this, associatedSkills, id);
+            DFInteraction.RegisterInDF(this,this.associatedSkills,Constants.DFSERVICE_RESOURCE); //DFInteraction.RegisterInDF(this, associatedSkills, id);
             //if(Constants.DEBUG)System.out.println("Registered in DF " + this.getLocalName() + "SKILLS " + Arrays.toString(this.associatedSkills));
         } catch (FIPAException ex) {
             Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE, null, ex);

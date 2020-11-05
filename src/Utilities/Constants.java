@@ -31,14 +31,9 @@ public class Constants {
     public static final String SK_QUALITY_CHECK = "sk_q_c";
    
     //Product type execution lists
-    public static final ArrayList<String> PROD_A = new ArrayList<>(Arrays.asList(
-            SK_PICK_UP, SK_GLUE_TYPE_A, SK_GLUE_TYPE_B, SK_QUALITY_CHECK, SK_DROP));
-                        //SK_GLUE_TYPE_A, SK_GLUE_TYPE_A, SK_GLUE_TYPE_B, SK_QUALITY_CHECK, SK_DROP)); //Helps with Sequential behaviour
-
-    public static final ArrayList<String> PROD_B = new ArrayList<>(Arrays.asList(
-            SK_PICK_UP, SK_GLUE_TYPE_A, SK_GLUE_TYPE_C, SK_QUALITY_CHECK, SK_DROP));
-    public static final ArrayList<String> PROD_C = new ArrayList<>(Arrays.asList(
-            SK_PICK_UP, SK_GLUE_TYPE_B, SK_GLUE_TYPE_C, SK_QUALITY_CHECK, SK_DROP));
+    public static final ArrayList<String> PROD_A = new ArrayList<>(Arrays.asList(SK_PICK_UP, SK_GLUE_TYPE_A, SK_GLUE_TYPE_B, SK_QUALITY_CHECK, SK_DROP));
+    public static final ArrayList<String> PROD_B = new ArrayList<>(Arrays.asList(SK_PICK_UP, SK_GLUE_TYPE_A, SK_GLUE_TYPE_C, SK_QUALITY_CHECK, SK_DROP));
+    public static final ArrayList<String> PROD_C = new ArrayList<>(Arrays.asList(SK_PICK_UP, SK_GLUE_TYPE_B, SK_GLUE_TYPE_C, SK_QUALITY_CHECK, SK_DROP));
 
     //Token
     public static final String TOKEN = "#TOKEN#";
