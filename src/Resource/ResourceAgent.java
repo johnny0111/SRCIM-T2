@@ -31,6 +31,7 @@ public class ResourceAgent extends Agent {
     String description;
     String[] associatedSkills;
     String location;
+    boolean isAvailable;
 
     @Override
     protected void setup() {
@@ -50,6 +51,7 @@ public class ResourceAgent extends Agent {
         }
 
         this.location = (String) args[3];
+        this.isAvailable = true;
 
         myLib.init(this);
         this.associatedSkills = myLib.getSkills();
@@ -74,58 +76,65 @@ public class ResourceAgent extends Agent {
         
         
         try {
-           
             DFInteraction.RegisterInDF(this,this.associatedSkills,"dfservice_resource"); //DFInteraction.RegisterInDF(this, associatedSkills, id);
-            if(Constants.DEBUG)System.out.println("Registered in DF " + this.getLocalName() + "SKILLS " + Arrays.toString(this.associatedSkills));
+            //if(Constants.DEBUG)System.out.println("Registered in DF " + this.getLocalName() + "SKILLS " + Arrays.toString(this.associatedSkills));
         } catch (FIPAException ex) {
             Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // TO DO: Add responder behaviour/s
-        
-        //@Amaral
-        this.addBehaviour(new responder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
+        this.addBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
         
     }
     
-    private class responder extends ContractNetResponder{
+    @Override
+    protected void takeDown() {
+        super.takeDown(); 
+    }
+    
+   //CONTRACTNET RESPONDER
+    private class CNresponder extends ContractNetResponder{
             
-        public responder(Agent a, MessageTemplate mt){
+        public CNresponder(Agent a, MessageTemplate mt){
             super(a, mt);
         }            
     
-    
-    
         @Override
         protected ACLMessage handleCfp(ACLMessage cfp) throws RefuseException, FailureException,  NotUnderstoodException{
+            
             System.out.println(myAgent.getLocalName() + ": Processing CFP message");
-
             ACLMessage msg = cfp.createReply();
-            msg.setPerformative(ACLMessage.PROPOSE);
             
-            
+            if(isAvailable){
+                msg.setPerformative(ACLMessage.PROPOSE);
+                String proposal = Integer.toString((int) Math.random()); //Random because we need them to be different, so we can chose, and tell them appart;
+                msg.setContent(proposal);
+                System.out.println(this.getAgent().getName() + ": sent CFP PROPOSAL to " + cfp.getSender().getName());
+            }
+            else{
+                msg.setPerformative(ACLMessage.REFUSE);
+                System.out.println(this.getAgent().getName() + ": sent CFP REFUSE to " + cfp.getSender().getName());
+            }
+
             return msg;
 
         }
 
         @Override
         protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) throws FailureException {
-            System.out.println(myAgent.getLocalName() + ":Preparing result of CFP");
+            System.out.println(myAgent.getLocalName() + ": CFP PROPOSAL accepted by: " + cfp.getSender().getName());
             block(2000);
             ACLMessage msg = cfp.createReply();
             msg.setPerformative(ACLMessage.INFORM);
-            String debug1 = Integer.toString((int) Math.random()); //Random because we need them to be different, so we can chose, and tell them appart;
-            System.out.println(debug1);
-            msg.setContent( debug1);
+            
+            //@HJ
+            //faz sentido este setContent?
+            msg.setContent(location);
+            isAvailable = false;        //depois de executar o skill voltamos a meter a true
             
             return msg;
         }
 
        
-    }
-     //*/ @Amaral no longer
-    @Override
-    protected void takeDown() {
-        super.takeDown(); 
     }
 }

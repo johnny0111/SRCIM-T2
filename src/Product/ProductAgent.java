@@ -28,6 +28,8 @@ import Utilities.Constants;
  * @author Ricardo Silva Peres <ricardo.peres@uninova.pt>
  */
 
+// -gui GlueStation1:Resource.ResourceAgent("GS1","GS1","TestLibrary","GlueStation1");GlueStation2:Resource.ResourceAgent("GS2","GS2","TestLibrary","GlueStation2");Operator:Resource.ResourceAgent("OP", "OP", "TestLibrary", "Source");GUI:Utilities.ConsoleAgent();
+
 public class ProductAgent extends Agent {    
     
     String id;
@@ -49,17 +51,17 @@ public class ProductAgent extends Agent {
         // of its own production 
         
         //************************************ @Henrique Joaquim
-        // é preciso registar no DF? Acho que como é o PA (não é procurado por outros) não é preciso
         this.execution_step = 0;
         
-        SequentialBehaviour sb = new SequentialBehaviour();
-        for(int i=0; i < executionPlan.size(); i++){
-            //next skill -> search in DF
-            sb.addSubBehaviour(new search_resource_InDF(this));
-            this.addBehaviour(sb);
-            
-        }
-        
+//        SequentialBehaviour sb = new SequentialBehaviour();
+//        for(int i=0; i < executionPlan.size(); i++){
+//            //next skill -> search in DF
+//            sb.addSubBehaviour(new search_resource_InDF(this));
+//            this.addBehaviour(sb);
+//            
+//        }
+        this.addBehaviour(new search_resource_InDF(this));
+
     }
 
     @Override
@@ -86,7 +88,7 @@ public class ProductAgent extends Agent {
             
             @Override
             protected void handleInform(ACLMessage inform){
-                System.out.println(myAgent.getLocalName() + ": INFORM message received");
+                System.out.println(myAgent.getLocalName() + ": INFORM message received.\n Resource location:= " + inform.getContent());
             }
             
             @Override
@@ -115,9 +117,7 @@ public class ProductAgent extends Agent {
                             bestProposer = msg.getSender();
                             accept = reply;
                         }
-//                        if (proposal == bestProposal){
-//                            System.out.println();
-//                        }
+//    
                     }
                     else{
                         System.out.println("(CFP) REFUSE received from: " + msg.getSender().getName());
@@ -141,14 +141,12 @@ public class ProductAgent extends Agent {
                 
                 }
                 */
-  
-                
+ 
             }
-            
+     
         }
     
-    //***************************** @Henrique Joaquim
-    //Search RA in DF
+  // FIPA REQUEST INITIATOR
     private class FIPAinitiator extends AchieveREInitiator{
         public FIPAinitiator(Agent a, ACLMessage msg){
             super(a, msg);
@@ -162,46 +160,49 @@ public class ProductAgent extends Agent {
             System.out.println(myAgent.getLocalName() + ": INFORM message received");
         }
     }
+    
+    
+    //@HJ
+    //CONTRACTNET INITIATOR
     private class search_resource_InDF extends OneShotBehaviour {
         
     public search_resource_InDF(Agent a){
         super(a);
     }
 
-        @Override
-        public void action() {
-
-            DFAgentDescription[] available_agents = null;
-
-            try {
-
-                System.out.println("Looking for resource: " + executionPlan.get(execution_step));
-                available_agents = DFInteraction.SearchInDFByName(executionPlan.get(execution_step),myAgent);
-                //available_agents = DFInteraction.SearchInDFByType(executionPlan.get(execution_step),myAgent);
-
-            } catch (FIPAException ex){
-                Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
-                if(Constants.DEBUG) System.out.println("ERRO Looking for resource: " + executionPlan.get(execution_step));
-            }
-
-            if(available_agents != null){
-                //perform cfp
-                ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
-
-                for(int i=0; i < available_agents.length; i++){
-                    cfp.addReceiver(available_agents[i].getName());
-                    System.out.println("Sent msg nr=" + i + " to agent" + available_agents[i].getName() + "(CFP) ");
-                }
-
-                myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
-            }
-
-            else{
-                System.out.println("Couldn't find resource: " + executionPlan.get(execution_step));
-            }
-
+    @Override
+    public void action() {
+        
+        DFAgentDescription[] available_agents = null;
+        
+        try {
+            
+            System.out.println("Looking for resource: " + executionPlan.get(execution_step));
+            available_agents = DFInteraction.SearchInDFByName(executionPlan.get(execution_step),myAgent);
+        
+        } catch (FIPAException ex){
+            Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
-}
-    //*****************************
+        
+        if(available_agents != null){
+            System.out.println("DEBUG1 + AVAILABLE AGENT:" + available_agents.length);
+            //perform cfp
+            ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
+            
+            for(int i=0; i < available_agents.length; i++){
+                cfp.addReceiver(available_agents[i].getName());
+                System.out.println("Sent msg nr=" + i + " to agent" + available_agents[i].getName() + "(CFP) ");
+            }
+            
+            myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
+        }
+        
+        else{
+            System.out.println("Couldn't find resource: " + executionPlan.get(execution_step));
+        }
+        
+    }
+
+    }
     
 }
