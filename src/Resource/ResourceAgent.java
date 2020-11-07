@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import Libraries.IResource;
 import Utilities.Constants;
 import Utilities.DFInteraction;
-import jade.core.behaviours.SequentialBehaviour;
 
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
@@ -20,7 +19,6 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAException;
 import jade.domain.DFService;
-import jade.proto.AchieveREResponder;
 import java.util.Set;
         /**
  *
@@ -63,7 +61,18 @@ public class ResourceAgent extends Agent {
         //A inscrição no DF deve ser o primeiro passo a ser executado por um agente, para que este possa ser
         //procurado pelos outros agentes presentes na plataforma. 
         
-
+//        DFAgentDescription dfd = new DFAgentDescription();
+//        dfd.setName(this.getAID());
+//        ServiceDescription sd = new ServiceDescription(); // Pointless? It's just the description
+//        sd.setType("dfservice_resource");
+//        sd.setName( getLocalName() );
+//        dfd.addServices(sd);
+//        try{
+//            DFService.register(this,  dfd);
+//            System.out.println("Registered " + getLocalName() + " in DF\n"+ this.description);
+//        }catch (FIPAException ex) {
+//            Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE,null,ex); //In tutorial it was Tutorial Agent
+//        }
         
         
         try {
@@ -74,23 +83,7 @@ public class ResourceAgent extends Agent {
         }
 
         // TO DO: Add responder behaviour/s
-        //this.addBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
-        
-        
-        //@Amaral
-        //To be Tested
-        
-        //this.addBehaviour(new FIPAresponder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
-        
-        SequentialBehaviour sb = new SequentialBehaviour();
-        
-        
-        sb.addSubBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
-        sb.addSubBehaviour(new FIPAresponder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
-        this.addBehaviour(sb);
-            
-        
-        
+        this.addBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
         
     }
     
@@ -127,59 +120,21 @@ public class ResourceAgent extends Agent {
 
         }
 
-        
         @Override
         protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) throws FailureException {
-            System.out.println(myAgent.getLocalName() + ": CFP PROPOSAL accepted by: " + cfp.getSender().getName()+ " executing: " + id);
+            System.out.println(myAgent.getLocalName() + ": CFP PROPOSAL accepted by: " + cfp.getSender().getName());
             block(2000);
             ACLMessage msg = cfp.createReply();
             msg.setPerformative(ACLMessage.INFORM);
-//            msg.getSender();
-//            
-//            
-            msg.addReceiver(cfp.getSender());
+            
             //@HJ
             //faz sentido este setContent?
-            
-            //@Amaral - Acho que mais vale fazer logo execute skill aqui
             msg.setContent(location);
             isAvailable = false;        //depois de executar o skill voltamos a meter a true
-
             
             return msg;
         }
 
        
     }
-    
-    //@Amaral
-    
-    private class FIPAresponder extends AchieveREResponder{
-        public FIPAresponder(Agent a, MessageTemplate mt){
-            
-            super(a,mt);
-        }
-        
-        @Override
-        protected ACLMessage handleRequest (ACLMessage request) throws NotUnderstoodException, RefuseException{
-            System.out.println(myAgent.getLocalName() + ": Preparing result of REQUEST");
-            
-            block(5000);
-            ACLMessage msg = request.createReply();
-            msg.setPerformative(ACLMessage.AGREE);
-            
-            return msg;
-            
-        }
-        
-        @Override
-        protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage responde) throws FailureException{
-            System.out.println(myAgent.getLocalName() + ": Preparing result of REQUEST");
-            block(5000);
-            ACLMessage msg = request.createReply();
-            msg.setPerformative(ACLMessage.INFORM);
-            return msg;
-        }
-    }
-    
 }
