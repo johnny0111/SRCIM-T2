@@ -41,6 +41,7 @@ public class ProductAgent extends Agent {
     // @HJ
     String current_location, next_location;
     int execution_step;
+    boolean location = true;
     AID bestProposer999;
     
     
@@ -120,6 +121,7 @@ public class ProductAgent extends Agent {
             //IT's not working properly
             //AskedResourceMsg.setContent(inform.getContent());
             msg.addReceiver(inform.getSender()); //might need to Remove it /take down() after deploy, not sure
+            search_resource_InDF_Done = true;
             
         }
 
@@ -247,7 +249,7 @@ public class ProductAgent extends Agent {
             //We can use a boolean variable to control this.
             
             System.out.println("It's Over");
-            search_resource_InDF_Done = true;
+            
             return search_resource_InDF_Done;
             //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
@@ -267,12 +269,14 @@ public class ProductAgent extends Agent {
 
         @Override
         public void action() {
-            if (search_resource_InDF_Done) {
+            if (search_resource_InDF_Done && location) {
+                search_resource_InDF_Done = false;
+                location = false;
                 ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
                 request.setContent(executionPlan.get(0));
                 request.addReceiver(bestProposer);
                 
-                System.out.println("*** LOG: " + myAgent.getLocalName() + " sent REQUEST to " + bestProposer.getLocalName());
+                
                 myAgent.addBehaviour(new FIPAinitiator(myAgent, request));
 //
 //                transportDone = false;
