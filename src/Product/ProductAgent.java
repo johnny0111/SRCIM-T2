@@ -114,6 +114,10 @@ public class ProductAgent extends Agent {
         protected void handleInform(ACLMessage inform) {
             System.out.println(myAgent.getLocalName() + ": INFORM message received.\n Resource location:= " + inform.getContent() + "From: "+inform.getSender().getName());
             
+            
+            
+            
+            //@AMARAL
             //As soon as we have confirmation on who is available for the resource we can add it as a receiver for the Request
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 
@@ -122,6 +126,7 @@ public class ProductAgent extends Agent {
             //AskedResourceMsg.setContent(inform.getContent());
             msg.addReceiver(inform.getSender()); //might need to Remove it /take down() after deploy, not sure
             search_resource_InDF_Done = true;
+            
             
         }
 
@@ -139,6 +144,7 @@ public class ProductAgent extends Agent {
             while (e.hasMoreElements()) {
 
                 ACLMessage msg = (ACLMessage) e.nextElement();
+                
 
                 if (msg.getPerformative() == ACLMessage.PROPOSE) {
 
@@ -206,7 +212,7 @@ public class ProductAgent extends Agent {
 
     //@HJ
     //CONTRACTNET INITIATOR
-    private class search_resource_InDF extends SimpleBehaviour {
+    private class search_resource_InDF extends OneShotBehaviour {
 
         public search_resource_InDF(Agent a) {
             super(a);
@@ -214,7 +220,7 @@ public class ProductAgent extends Agent {
 
         @Override
         public void action() {
-
+            
             DFAgentDescription[] available_agents = null;
 
             try {
@@ -244,15 +250,15 @@ public class ProductAgent extends Agent {
 
         }
 
-        @Override
-        public boolean done() { //Cool Suff to make some magical mambos
-            //We can use a boolean variable to control this.
-            
-            System.out.println("It's Over");
-            
-            return search_resource_InDF_Done;
-            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+//        @Override
+//        public boolean done() { //Cool Suff to make some magical mambos
+//            We can use a boolean variable to control this.
+//            
+//            System.out.println("It's Over");
+//            
+//            return search_resource_InDF_Done;
+//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        }
 
     }
     
