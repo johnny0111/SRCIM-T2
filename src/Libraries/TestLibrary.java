@@ -21,6 +21,7 @@ public class TestLibrary implements IResource {
     @Override
     public boolean executeSkill(String skillID) {
         try {
+            System.out.println("DEBUG2 Executing: " + skillID);
             switch (skillID) {
                 case Utilities.Constants.SK_GLUE_TYPE_A: {
                     Thread.sleep(2000);
