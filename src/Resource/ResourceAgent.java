@@ -74,24 +74,19 @@ public class ResourceAgent extends Agent {
         }
 
         // TO DO: Add responder behaviour/s
-        //this.addBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
         
-        
+//        SequentialBehaviour sb = new SequentialBehaviour();
+        //@AMARAl
+        //Nota do Professor - Alterar de Sequencial para nao prender no CFP
+//        sb.addSubBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
+//        sb.addSubBehaviour(new FIPAresponder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
+//        this.addBehaviour(sb);
+
         //@Amaral
-        //To be Tested
-        
-        //this.addBehaviour(new FIPAresponder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
-        
-        SequentialBehaviour sb = new SequentialBehaviour();
-        
-        
-        sb.addSubBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
-        sb.addSubBehaviour(new FIPAresponder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
-        this.addBehaviour(sb);
-            
-        
-        
-        
+        //Changed to Normal From Sequential because he was getting stuck at CFP call                        
+        this.addBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
+        this.addBehaviour(new FIPAresponder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
+                         
     }
     
     @Override
@@ -131,7 +126,7 @@ public class ResourceAgent extends Agent {
         @Override
         protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) throws FailureException {
             System.out.println(myAgent.getLocalName() + ": CFP PROPOSAL accepted by: " + cfp.getSender().getName()+ " executing: " + id);
-            block(2000);
+            //block(2000);
             ACLMessage msg = cfp.createReply();
             msg.setPerformative(ACLMessage.INFORM);
 //            msg.getSender();
@@ -139,9 +134,9 @@ public class ResourceAgent extends Agent {
 //            
             msg.addReceiver(cfp.getSender());
             //@HJ
-            //faz sentido este setContent?
+            //faz sentido este setContent? @Amaral - eventualmente sim, nem que seja para testar que funciona
             
-            //@Amaral - Acho que mais vale fazer logo execute skill aqui
+            //@Amaral
             msg.setContent(location);
             isAvailable = false;        //depois de executar o skill voltamos a meter a true
 
@@ -158,6 +153,7 @@ public class ResourceAgent extends Agent {
         public FIPAresponder(Agent a, MessageTemplate mt){
             
             super(a,mt);
+            //System.out.println("This Agent: "+ a.getName() + " is a Responder");
         }
         
         @Override

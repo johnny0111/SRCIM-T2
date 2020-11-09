@@ -1,1 +1,1 @@
-http://LAPTOP-EDPQQV9C:7778/acc
+http://LAPTOP-EDPQQV9C.lan:7778/acc

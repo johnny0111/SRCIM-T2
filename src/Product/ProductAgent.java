@@ -79,7 +79,7 @@ public class ProductAgent extends Agent {
         SequentialBehaviour sb = new SequentialBehaviour();
 
         sb.addSubBehaviour(new search_resource_InDF(this)); //Searches and also does CFP
-        sb.addSubBehaviour(new ExecuteSkill(this));
+        sb.addSubBehaviour(new RequestSkill(this));
         
         this.addBehaviour(sb);
 
@@ -112,7 +112,7 @@ public class ProductAgent extends Agent {
 
         @Override
         protected void handleInform(ACLMessage inform) {
-            System.out.println(myAgent.getLocalName() + ": INFORM message received.\n Resource location:= " + inform.getContent() + "From: "+inform.getSender().getName());
+            System.out.println(myAgent.getLocalName() + ": INFORM message received.\n Resource location:= " + inform.getContent() + "From: "+inform.getSender().getName() + "Research_in_DF is true now");
             
             
             
@@ -123,7 +123,7 @@ public class ProductAgent extends Agent {
 
             
             //IT's not working properly
-            //AskedResourceMsg.setContent(inform.getContent());
+            
             msg.addReceiver(inform.getSender()); //might need to Remove it /take down() after deploy, not sure
             search_resource_InDF_Done = true;
             
@@ -264,11 +264,11 @@ public class ProductAgent extends Agent {
     
     
     
-    private class ExecuteSkill extends SimpleBehaviour {
+    private class RequestSkill extends SimpleBehaviour {
 
         private boolean finished;
 
-        public ExecuteSkill(Agent a) {
+        public RequestSkill(Agent a) {
             super(a);
             this.finished = false;
         }
@@ -276,14 +276,18 @@ public class ProductAgent extends Agent {
         @Override
         public void action() {
             if (search_resource_InDF_Done && location) {
+                
                 search_resource_InDF_Done = false;
-                location = false;
+                location = false; //So it doesnt do it infinitly
                 ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+                
                 request.setContent(executionPlan.get(0));
                 request.addReceiver(bestProposer);
                 
                 
                 myAgent.addBehaviour(new FIPAinitiator(myAgent, request));
+                System.out.println("Executing Skill (productAgent Debug). Addeed behaviour FIPAInitiatiator with: "+
+                        myAgent.getName()+ "and request receiver is "+bestProposer.getName());
 //
 //                transportDone = false;
 //                this.finished = true;
@@ -293,6 +297,13 @@ public class ProductAgent extends Agent {
         @Override
         public boolean done() {
             return this.finished;
+        }
+        
+        @Override
+        public int  onEnd(){
+            
+            return 1;
+            
         }
     }
 
