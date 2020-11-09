@@ -125,7 +125,7 @@ public class ResourceAgent extends Agent {
         
         @Override
         protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) throws FailureException {
-            System.out.println(myAgent.getLocalName() + ": CFP PROPOSAL accepted by: " + cfp.getSender().getName()+ " executing: " + id);
+            System.out.println(myAgent.getLocalName() + ": CFP PROPOSAL accepted by: " + cfp.getSender().getLocalName()+ " executing: " + id);
             //block(2000);
             ACLMessage msg = cfp.createReply();
             msg.setPerformative(ACLMessage.INFORM);
@@ -134,11 +134,16 @@ public class ResourceAgent extends Agent {
 //            
             msg.addReceiver(cfp.getSender());
             //@HJ
-            //faz sentido este setContent? @Amaral - eventualmente sim, nem que seja para testar que funciona
+            //faz sentido este setContent? @Amaral - Sim, esta location vais mandar para o Agent de transport
             
             //@Amaral
             msg.setContent(location);
-            isAvailable = false;        //depois de executar o skill voltamos a meter a true
+            
+            //Not sure if we should make availability false here  (before the transport to location) 
+            //or only when executing. As of Today (09/11) we have on both spots
+            isAvailable = false;        
+            //depois de executar o skill voltamos a meter a true
+           
 
             
             return msg;
@@ -148,7 +153,11 @@ public class ResourceAgent extends Agent {
     }
     
     //@Amaral
-    
+    /*============================================
+    //Fipa Respodner Regarding Resource Request's
+    At a first step it Prints out an Agree Notification
+    And later on Informs that the Request was in fact made
+    =============================================*/
     private class FIPAresponder extends AchieveREResponder{
         public FIPAresponder(Agent a, MessageTemplate mt){
             
@@ -158,11 +167,15 @@ public class ResourceAgent extends Agent {
         
         @Override
         protected ACLMessage handleRequest (ACLMessage request) throws NotUnderstoodException, RefuseException{
-            System.out.println(myAgent.getLocalName() + ": Preparing result of REQUEST");
+            System.out.println(myAgent.getLocalName() + " Agreed with the Request to: " + request.getContent());
             
-            block(5000);
+           
             ACLMessage msg = request.createReply();
             msg.setPerformative(ACLMessage.AGREE);
+            msg.setContent(request.getContent());
+            
+            
+            
             
             return msg;
             
@@ -170,9 +183,24 @@ public class ResourceAgent extends Agent {
         
         @Override
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage responde) throws FailureException{
-            System.out.println(myAgent.getLocalName() + ": Preparing result of REQUEST");
-            block(5000);
+            //System.out.println(myAgent.getLocalName() + ": Executed Skill Requested");
+            
             ACLMessage msg = request.createReply();
+            msg.setContent(request.getContent());
+            
+            
+            //@AMARAL
+            isAvailable = false;
+            System.out.println("B4 execute skill ||| "+this.myAgent.getLocalName()+"Is currently unavailable");
+            
+            //Message Request Content MUST be skill_ID, or else it won't work, be careful  not to change it elsewhere
+            myLib.executeSkill(msg.getContent());
+            isAvailable = true;
+            System.out.println("After execute skill ||| "+this.myAgent.getLocalName()+"is currently Available");
+            
+            //Esta variavel controla o CFP
+            
+            
             msg.setPerformative(ACLMessage.INFORM);
             return msg;
         }

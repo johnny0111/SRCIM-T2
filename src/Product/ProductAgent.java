@@ -24,6 +24,8 @@ import java.util.Enumeration;
 import Utilities.Constants;
 import jade.core.behaviours.SimpleBehaviour;
 
+import Libraries.IResource;
+
 /**
  *
  * @author Ricardo Silva Peres <ricardo.peres@uninova.pt>
