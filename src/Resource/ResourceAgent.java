@@ -154,9 +154,10 @@ public class ResourceAgent extends Agent {
     
     //@Amaral
     /*============================================
-    //Fipa Respodner Regarding Resource Request's
-    At a first step it Prints out an Agree Notification
-    And later on Informs that the Request was in fact made
+    //Fipa Responder Regarding Resource's Request's
+    At at first, it Prints out an Agree Notification
+    And later on Informs that the skill was complete 
+    and Resource is again available
     =============================================*/
     private class FIPAresponder extends AchieveREResponder{
         public FIPAresponder(Agent a, MessageTemplate mt){
@@ -189,7 +190,9 @@ public class ResourceAgent extends Agent {
             msg.setContent(request.getContent());
             
             
-            //@AMARAL
+            //@AMARAL - This False is supposed to Already be false, but let's make sure it is, here
+            //We should also check here, if the Product is already at the right Location, or maybe only Request when so
+            
             isAvailable = false;
             System.out.println("B4 execute skill ||| "+this.myAgent.getLocalName()+"Is currently unavailable");
             
