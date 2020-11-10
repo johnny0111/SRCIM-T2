@@ -45,6 +45,7 @@ public class ProductAgent extends Agent {
     int execution_step;
     boolean location = true;
     AID bestProposer999;
+    String location2;
     
     
     public boolean search_resource_InDF_Done = false;
@@ -55,7 +56,7 @@ public class ProductAgent extends Agent {
         this.id = (String) args[0];
         this.executionPlan = this.getExecutionList((String) args[1]);
         System.out.println("Product launched: " + this.id + " Requires: " + executionPlan);
-
+        this.location2 = "Spawn";
         
         
         // TO DO: Add necessary behaviour/s for the product to control the flow
