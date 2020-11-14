@@ -74,16 +74,14 @@ public class ProductAgent extends Agent {
         //@HJ
         //Sequência de ações prevista: Procurar recursos -> Pedir Transporte -> Pedir Execução -> (done) -> repetir até acabar a lista
         
-//        SequentialBehaviour sb = new SequentialBehaviour();
-//        for(int i=0; i < executionPlan.size(); i++){
-//            //next skill -> search in DF
-//            sb.addSubBehaviour(new search_resource_InDF(this));
-//            this.addBehaviour(sb);
-//        }
-        this.addBehaviour(new search_resource_InDF(this));
-        this.addBehaviour(new transport(this));
-        this.addBehaviour(new RequestSkill(this));
-        
+        SequentialBehaviour sb = new SequentialBehaviour();
+        for(int i=0; i < executionPlan.size(); i++){
+            //next skill -> search in DF
+            sb.addSubBehaviour(new search_resource_InDF(this));
+            sb.addSubBehaviour(new transport(this));
+            sb.addSubBehaviour(new request_skill(this));
+            this.addBehaviour(sb);
+        }
 
     }
 
@@ -116,7 +114,7 @@ public class ProductAgent extends Agent {
             
             @Override
             protected void handleInform(ACLMessage inform){
-                System.out.println(myAgent.getLocalName() + ": INFORM message received.\n Resource location:= " + inform.getContent());
+                System.out.println(myAgent.getLocalName() + ": INFORM message received.\n Resource location: " + inform.getContent());
                 
                 next_location = inform.getContent();
                 
@@ -412,11 +410,11 @@ public class ProductAgent extends Agent {
 //***********************************************************************************************************************
 //***********************************************************************************************************************
 //Execute Skill
-      private class RequestSkill extends SimpleBehaviour {
+      private class request_skill extends SimpleBehaviour {
 
         private boolean finished;
 
-        public RequestSkill(Agent a) {
+        public request_skill(Agent a) {
             super(a);
             this.finished = false;
         }
