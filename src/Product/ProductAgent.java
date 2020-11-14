@@ -81,7 +81,8 @@ public class ProductAgent extends Agent {
 //            this.addBehaviour(sb);
 //        }
         this.addBehaviour(new search_resource_InDF(this));
-        //this.addBehaviour(new transport(this));
+        this.addBehaviour(new transport(this));
+        this.addBehaviour(new RequestSkill(this));
         
 
     }
@@ -313,20 +314,19 @@ public class ProductAgent extends Agent {
             
             if(available_agents != null){
                 
-                //perform request to TA (AGV)
-                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-                
-                //enviar localização atual
-                //enviar próxima localização
-                //msg.setContent(...) como posso enviar as duas??
-                
-                ta = available_agents[0].getName(); //declaramos como vetor e sabemos que só existe um, por isso podemos ir buscar desta maneira
+                System.out.println(myAgent.getLocalName() + " found TA");
 
-                 msg.addReceiver(ta);
-                 System.out.println("Sent msg requesting transportation to:" + ta.getLocalName());
-            
-                myAgent.addBehaviour(new REInitiator_ta(myAgent,msg));
+                ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+                
+                request.setContent(current_location + Constants.TOKEN + next_location);
+                request.setOntology(Constants.ONTOLOGY_MOVE);
+                
+                ta = available_agents[0].getName();
+                request.addReceiver(ta);
 
+                System.out.println(myAgent.getLocalName() + ": requested " + available_agents[0].getName().getLocalName());
+
+                myAgent.addBehaviour(new REInitiator_ta(myAgent, request));
             }        
             else
                 System.out.println(myAgent.getLocalName() + "Could not find TA");

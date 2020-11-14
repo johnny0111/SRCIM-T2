@@ -89,10 +89,10 @@ public class TransportAgent extends Agent {
             ACLMessage msg = request.createReply();
             
             if(isAvailable){
-                //@HJ
-                // tenho que ver como se enviam estas variaveis no PA
-                // initial position
-                // destination position
+                
+//                if(!"Spawn".equals(location)){
+//                    myLib.executeMove(location, "Spawn");
+//                }
                 
                 isAvailable=false;
                 
