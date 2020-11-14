@@ -63,15 +63,12 @@ public class ProductAgent extends Agent {
         this.execution_step = 0;
         this.current_location = "Source";
         
-        //@hj
         this.request_agv = false;
         this.ra_negotiation_done = false;   //hj: this bool is used so we can "block" the TA call until the negotiation with RA is done
         this.transport_done = false;        //hj: this bool is used so we can "block" the execution of a Skill b4 finishing transportation
         this.skill_done = false;            //hj: this bool is used so we can "block" the next iteration of the sequential behaviour
         
-        //@HJ
         //Sequência de ações prevista: Procurar recursos -> Pedir Transporte -> Pedir Execução -> (done) -> repetir até acabar a lista
-        
         SequentialBehaviour sb = new SequentialBehaviour();
         for(int i=0; i < executionPlan.size(); i++){
             //next skill -> search in DF
@@ -103,12 +100,14 @@ public class ProductAgent extends Agent {
  //***********************************************************************************************************************
 //***********************************************************************************************************************
 //CN initiator    
-    //@HJ
     //Referência: http://www.iro.umontreal.ca/~dift6802/jade/src/examples/protocols/ContractNetInitiatorAgent.java
     private class CNinitiator extends ContractNetInitiator{
+
+        private final ACLMessage msg;
             
             public CNinitiator(Agent a, ACLMessage msg){
                 super(a, msg);
+                this.msg = msg;
             }
             
             @Override
@@ -166,25 +165,31 @@ public class ProductAgent extends Agent {
                 
                 else{
                 
-                /* //*******
-                
-                    Aqui temos que arranjar maneira de agir em caso de não haver nenhuma proposta aceite.
-                    Voltamos a fazer uma CFP mas agora para os agentes que já tinham respondido (array responses)
-                    Uma vez que não há necessidade de voltar a procurar que agentes fazem determinado skill.
-                
-                */ //*******
-                
-                    //perform cfp
-                    ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
-                    int i=0; //debug purposes, so we can see how if the number of messages is ok
-                    while(e.hasMoreElements()){
-                        ACLMessage msg = (ACLMessage)e.nextElement();
-                        cfp.addReceiver(msg.getSender());
-                        System.out.println("Sent msg nr=" + i + " to agent" + msg.getSender().getLocalName() + "(CFP) ");
-                        i++;
+                    try {
+                        /* //*******
+                        
+                        Aqui temos que arranjar maneira de agir em caso de não haver nenhuma proposta aceite.
+                        Voltamos a fazer uma CFP mas agora para os agentes que já tinham respondido (array responses)
+                        Uma vez que não há necessidade de voltar a procurar que agentes fazem determinado skill.
+                        
+                        */ //*******
+                        
+                        //perform cfp
+                        //ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
+//                    int i=0; //debug purposes, so we can see how if the number of messages is ok
+//                    while(e.hasMoreElements()){
+//                        ACLMessage msg = (ACLMessage)e.nextElement();
+//                        cfp.addReceiver(msg.getSender());
+//                        System.out.println("Sent msg nr=" + i + " to agent" + msg.getSender().getLocalName() + "(CFP) ");
+//                        i++;
+//                    }
+
+                    Thread.sleep(2000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
                     }
-            
-                    myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
+               
+                    myAgent.addBehaviour(new CNinitiator(myAgent,this.msg));
                 
                 }
                 
@@ -286,7 +291,7 @@ public class ProductAgent extends Agent {
 
 //***********************************************************************************************************************
 //***********************************************************************************************************************
-//Search TA in DF -> OneShotBehaviour
+//Search TA in DF
 
     private class search_ta_InDF extends OneShotBehaviour{
 
@@ -342,7 +347,7 @@ public class ProductAgent extends Agent {
     
  //***********************************************************************************************************************
 //***********************************************************************************************************************
-//Transport -> Simple Behaviour
+//Transport
     
     private class transport extends SimpleBehaviour
     {
