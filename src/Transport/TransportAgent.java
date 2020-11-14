@@ -113,11 +113,6 @@ public class TransportAgent extends Agent {
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException{
             System.out.println(myAgent.getLocalName() + ": Preparing results of transportation REQUEST");
             
-            //@HJ
-            //ver isto (no código do Pedro está assim mas a função que está
-            //definida em ITranspor.java só tem 2 argumentos de entrada
-            //myLib.executeMove(initial_position, dest_position, id);
-            
             myLib.executeMove(initial_position, dest_position);
             
             ACLMessage msg = request.createReply();
