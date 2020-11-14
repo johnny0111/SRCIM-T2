@@ -17,6 +17,8 @@ import jade.domain.FIPAAgentManagement.FailureException;
 import jade.proto.AchieveREResponder;
 import Libraries.ITransport;
 import java.util.StringTokenizer;
+
+import Product.ProductAgent;
 /**
  *
  * @prof: Ricardo Silva Peres <ricardo.peres@uninova.pt>
@@ -68,8 +70,8 @@ public class TransportAgent extends Agent {
             Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
         // Responder behaviour/s
-        this.addBehaviour(new TransportAgent.responder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
-       
+        this.addBehaviour(new TransportAgent.responder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
+        
         
     }
     
@@ -83,6 +85,8 @@ public class TransportAgent extends Agent {
         
         public responder(Agent a, MessageTemplate mt){
             super(a, mt);
+            System.out.println(myAgent.getLocalName() + "(TA): Called to action Request from: ");
+            
         }
         @Override
         protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException{

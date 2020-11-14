@@ -256,7 +256,7 @@ public class ProductAgent extends Agent {
 
         public REInitiator_ta(Agent a, ACLMessage msg) {
             super(a, msg);
-            System.out.println("Initiated FIPA REQUEST as :" + myAgent.getLocalName());
+            System.out.println("Initiated FIPA REQUEST as :" + myAgent.getLocalName()  );
 
         }
 
@@ -313,17 +313,22 @@ public class ProductAgent extends Agent {
                 
                 System.out.println(myAgent.getLocalName() + " found TA: " + available_agents.length);
 
-                ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+                ACLMessage request2 = new ACLMessage(ACLMessage.REQUEST);
                 
-                request.setContent(current_location + Constants.TOKEN + next_location);
-                request.setOntology(Constants.ONTOLOGY_MOVE);
+                request2.setContent(current_location + Constants.TOKEN + next_location);
+                request2.setOntology(Constants.ONTOLOGY_MOVE);
+                
                 
                 ta = available_agents[0].getName();
-                request.addReceiver(ta);
+                request2.addReceiver(ta);
+                
+                    request2.getAllReceiver().next().toString();
+                    System.out.println("mano bro caralho fdp e bom que funciones" + request2.getAllReceiver().next().toString());
+                
 
-                System.out.println(myAgent.getLocalName() + ": requested " + available_agents[0].getName().getLocalName());
+                System.out.println(myAgent.getLocalName() + ": requested " + available_agents[0].getName().getLocalName() /*+ /*"deixa imprimir: " +request.getAllReceiver().*/);
 
-                myAgent.addBehaviour(new REInitiator_ta(myAgent, request));
+                myAgent.addBehaviour(new REInitiator_ta(myAgent, request2));
             }        
             else
                 System.out.println(myAgent.getLocalName() + "Could not find TA");
@@ -432,7 +437,7 @@ public class ProductAgent extends Agent {
                 
                 
                 myAgent.addBehaviour(new REinitiator_ra(myAgent, request));
-                System.out.println("se for aqui nem ta mau");
+                System.out.println("se for aqui nem ta mau: " + bestResource.toString() );
                 System.out.println("Executing Skill (productAgent Debug). Addeed behaviour FIPAInitiatiator with: " + myAgent.getLocalName()+ "and request receiver is " + bestResource.getLocalName());
 
                 transport_done = false;
