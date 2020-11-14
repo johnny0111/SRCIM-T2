@@ -45,7 +45,7 @@ public class ProductAgent extends Agent {
     int execution_step;
     boolean location = true;
     AID bestProposer999;
-    String location2;
+
     
     
     public boolean search_resource_InDF_Done = false;
@@ -56,7 +56,7 @@ public class ProductAgent extends Agent {
         this.id = (String) args[0];
         this.executionPlan = this.getExecutionList((String) args[1]);
         System.out.println("Product launched: " + this.id + " Requires: " + executionPlan);
-        this.location2 = "Spawn";
+        
         
         
         // TO DO: Add necessary behaviour/s for the product to control the flow
@@ -64,6 +64,7 @@ public class ProductAgent extends Agent {
         
         //************************************ @Henrique Joaquim
         this.execution_step = 0;
+        this.current_location = "spawn";
 
         //@Amaral
         //Needs Testing TODO
@@ -191,7 +192,7 @@ public class ProductAgent extends Agent {
 
     }
     //@Joao 
-    // FIPA REQUEST INITIATOR
+    // FIPA REQUEST INITIATOR- TRANSPORT
 
     private class FIPAinitiator extends AchieveREInitiator {
 
@@ -309,5 +310,42 @@ public class ProductAgent extends Agent {
             
         }
     }
+    
+    //@joao
+    //TRANSPORT
+    //PROCURAR TRANSPORT NA DF
+      private class SearchTransport extends OneShotBehaviour {
+
+        public SearchTransport(Agent a) {
+            super(a);
+        }
+
+        @Override
+        public void action() {
+            DFAgentDescription[] transportAgents = null;
+            try {
+                System.out.println("*** LOG: " + myAgent.getLocalName() + " searching DF for transport agents");
+                transportAgents = DFInteraction.SearchInDFByName("sk_move", myAgent);
+            } catch (FIPAException e) {
+                System.out.println("*** LOG: " + myAgent.getLocalName() + " threw FIPAException searching DF for transport agents");
+            }
+
+            if (transportAgents != null) {
+                System.out.println("*** LOG: " + myAgent.getLocalName() + " found " + transportAgents.length + " transport agents");
+
+                ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+                request.setContent(location + Constants.TOKEN + nextLocation);
+                transport = transportAgents[0].getName();
+                request.addReceiver(transport);
+
+                System.out.println("*** LOG: " + myAgent.getLocalName() + " sent REQUEST to " + transportAgents[0].getName().getLocalName());
+
+                myAgent.addBehaviour(new REInitiatorTransport(myAgent, request));
+            } else {
+                System.out.println("*** LOG: " + myAgent.getLocalName() + " coudln't find transport agents");
+            }
+        }
+    }
 
 }
+

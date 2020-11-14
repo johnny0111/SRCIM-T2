@@ -1,0 +1,161 @@
+
+Skip to content
+Pull requests
+Issues
+Marketplace
+Explore
+@johnny0111
+Learn Git and GitHub without any code!
+
+Using the Hello World guide, you’ll start a branch, write comments, and open a pull request.
+pmsdOliveira /
+srcim-2020
+
+1
+0
+
+    0
+
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+
+    Insights
+
+srcim-2020/CPS/src/Transport/TransportAgent.java /
+@pmsdOliveira
+pmsdOliveira Now works with Coppelia Simulator
+Latest commit 3968da6 12 days ago
+History
+1 contributor
+112 lines (92 sloc) 3.88 KB
+package Transport;
+
+import jade.core.Agent;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import Libraries.ITransport;
+import Utilities.Constants;
+import Utilities.DFInteraction;
+import jade.domain.FIPAAgentManagement.FailureException;
+import jade.domain.FIPAAgentManagement.NotUnderstoodException;
+import jade.domain.FIPAAgentManagement.RefuseException;
+import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.proto.AchieveREResponder;
+import java.util.StringTokenizer;
+
+/**
+ *
+ * @author Ricardo Silva Peres <ricardo.peres@uninova.pt>
+ */
+public class TransportAgent extends Agent {
+
+    String id;
+    ITransport myLib;
+    String description;
+    String[] associatedSkills;
+    String source, destination;
+    boolean available;
+
+    @Override
+    protected void setup() {
+        Object[] args = this.getArguments();
+        this.id = (String) args[0];
+        this.description = (String) args[1];
+
+        //Load hw lib
+        try {
+            String className = "Libraries." + (String) args[2];
+            Class cls = Class.forName(className);
+            Object instance;
+            instance = cls.newInstance();
+            myLib = (ITransport) instance;
+            System.out.println(instance);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            Logger.getLogger(TransportAgent.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        this.available = true;
+
+        myLib.init(this);
+        this.associatedSkills = myLib.getSkills();
+        System.out.println("Transport Deployed: " + this.id + " Executes: " + Arrays.toString(associatedSkills));
+
+        // TO DO: Register in DF
+        try {
+            DFInteraction.RegisterInDF(this, this.associatedSkills, Constants.DFSERVICE_RESOURCE);
+        } catch (FIPAException e) {
+            System.out.println("Error registering " + this.id + " in DF");
+        }
+
+        // TO DO: Add responder behaviour/s
+        this.addBehaviour(new REResponder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
+    }
+
+    @Override
+    protected void takeDown() {
+        super.takeDown();
+    }
+
+    private class REResponder extends AchieveREResponder {
+
+        public REResponder(Agent a, MessageTemplate mt) {
+            super(a, mt);
+        }
+
+        @Override
+        protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
+            System.out.println("*** LOG: " + myAgent.getLocalName() + " received REQUEST from " + request.getSender().getLocalName());
+
+            ACLMessage reply = request.createReply();
+            if (available) {
+                StringTokenizer st = new StringTokenizer(request.getContent(), Constants.TOKEN);
+                source = st.nextToken();
+                destination = st.nextToken();
+                
+                available = false;
+                
+                reply.setPerformative(ACLMessage.AGREE);
+                System.out.println("*** LOG: " + myAgent.getLocalName() + " sent AGREE to " + request.getSender().getLocalName());
+            } else {
+                reply.setPerformative(ACLMessage.REFUSE);
+                System.out.println("*** LOG: " + myAgent.getLocalName() + " sent REFUSE to " + request.getSender().getLocalName());
+            }
+
+            return reply;
+        }
+
+        @Override
+        protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
+            myLib.executeMove(source, destination, id);
+            ACLMessage inform = request.createReply();
+            inform.setPerformative(ACLMessage.INFORM);
+            System.out.println("*** LOG: " + myAgent.getLocalName() + " sent INFORM to " + request.getSender().getLocalName());
+            available = true;
+            
+            return inform;
+        }
+    }
+
+}
+© 2020 GitHub, Inc.
+Terms
+Privacy
+
+    Security
+    Status
+    Help
+    Contact GitHub
+    Pricing
+    API
+    Training
+    Blog
+    About
+

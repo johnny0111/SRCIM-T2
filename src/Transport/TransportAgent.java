@@ -29,7 +29,7 @@ public class TransportAgent extends Agent {
     String[] associatedSkills;
     
     //@HJ
-    String initial_position, dest_position;
+    String location = "Spawn";
     boolean isAvailable;
     
 
@@ -53,7 +53,7 @@ public class TransportAgent extends Agent {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(TransportAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+       
         myLib.init(this);
         this.associatedSkills = myLib.getSkills();
         System.out.println("Transport Deployed: " + this.id + " Executes: " + Arrays.toString(associatedSkills));
@@ -89,15 +89,14 @@ public class TransportAgent extends Agent {
             ACLMessage msg = request.createReply();
             
             if(isAvailable){
-                //@HJ
-                // tenho que ver como se enviam estas variaveis no PA
-                // initial position
-                // destination position
+                if(!"Spawn".equals(location)){
+                    myLib.executeMove(location, "Spawn");
+                }
                 
-                isAvailable=false;
+            isAvailable=false;
                 
-                msg.setPerformative(ACLMessage.AGREE);
-                System.out.println(myAgent.getLocalName() + "(TA): sent AGREE to: " + request.getSender().getName());
+            msg.setPerformative(ACLMessage.AGREE);
+            System.out.println(myAgent.getLocalName() + "(TA): sent AGREE to: " + request.getSender().getName());
 
             }else{
                 msg.setPerformative(ACLMessage.REFUSE);
