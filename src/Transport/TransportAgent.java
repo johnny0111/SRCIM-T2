@@ -19,6 +19,7 @@ import Libraries.ITransport;
 import java.util.StringTokenizer;
 
 import Product.ProductAgent;
+import static Utilities.Constants.ONTOLOGY_MOVE;
 /**
  *
  * @prof: Ricardo Silva Peres <ricardo.peres@uninova.pt>
@@ -122,6 +123,7 @@ public class TransportAgent extends Agent {
             
             ACLMessage msg = request.createReply();
             msg.setPerformative(ACLMessage.INFORM);
+            msg.setOntology(ONTOLOGY_MOVE);
             
             System.out.println(myAgent.getLocalName() + " (TA): Performed MOVE operation to: " + request.getSender().getLocalName());
             isAvailable = true;

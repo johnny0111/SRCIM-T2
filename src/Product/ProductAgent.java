@@ -113,7 +113,7 @@ public class ProductAgent extends Agent {
             
             @Override
             protected void handleInform(ACLMessage inform){
-                System.out.println(myAgent.getLocalName() + ": INFORM message received.\n Resource location: " + inform.getContent());
+                System.out.println(myAgent.getLocalName() + ": INFORM message received.");
                 
                 next_location = inform.getContent();
                 
@@ -152,7 +152,7 @@ public class ProductAgent extends Agent {
                         }
                     }
                     else{
-                        System.out.println("(CFP) REFUSE received from: " + msg.getSender().getName());
+                        System.out.println("(CFP) REFUSE received from: " + msg.getSender().getLocalName());
                     }
                 }
                 
@@ -470,10 +470,13 @@ public class ProductAgent extends Agent {
         public void action() {
             if (skill_done) {
                 System.out.println(myAgent.getLocalName() + " finished execution step: " + executionPlan.get(execution_step) + "\n");
-
+                if(executionPlan.get(execution_step).equals("sk_drop")){
+                    System.out.println("The manufacture of " + myAgent.getLocalName()  +" has been completed with SUCCESS!");
+                }
                 skill_done = false;
                 execution_step++;
                 this.finished = true;
+                
             }
         }
 

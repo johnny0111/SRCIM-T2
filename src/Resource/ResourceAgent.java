@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import Libraries.IResource;
 import Utilities.Constants;
+import static Utilities.Constants.ONTOLOGY_EXECUTE_SKILL;
 import Utilities.DFInteraction;
 import jade.core.behaviours.SequentialBehaviour;
 
@@ -123,13 +124,13 @@ public class ResourceAgent extends Agent {
             ACLMessage msg = cfp.createReply();
             msg.setPerformative(ACLMessage.INFORM);
          
-            msg.addReceiver(cfp.getSender());
+            //msg.addReceiver(cfp.getSender());
             
             msg.setContent(location);
             
             
             isAvailable = false;        
-            //depois de executar o skill voltamos a meter a true
+            //After executing skill return to true
            
 
             
@@ -161,6 +162,7 @@ public class ResourceAgent extends Agent {
             ACLMessage msg = request.createReply();
             msg.setPerformative(ACLMessage.AGREE);
             msg.setContent(request.getContent());
+            msg.setOntology(ONTOLOGY_EXECUTE_SKILL);
             
             
             
