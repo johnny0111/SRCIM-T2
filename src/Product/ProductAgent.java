@@ -25,30 +25,27 @@ import Utilities.Constants;
 import jade.core.behaviours.SimpleBehaviour;
 
 import Libraries.IResource;
+import java.io.IOException;
 
 /**
  * Prof: Ricardo Peres
+ *
  * @authors: Henrique Joaquim, Pedro Amaral & João Carvalho
  */
-
 // -gui GlueStation1:Resource.ResourceAgent("GS1","GS1","TestLibrary","GlueStation1");GlueStation2:Resource.ResourceAgent("GS2","GS2","TestLibrary","GlueStation2");Operator:Resource.ResourceAgent("OP", "OP", "TestLibrary", "Source");GUI:Utilities.ConsoleAgent();
 // -gui GUI:Utilities.ConsoleAgent();
-
-
 public class ProductAgent extends Agent {
 
     String id;
     ArrayList<String> executionPlan = new ArrayList<>();
     // TO DO: Add remaining attributes required for your implementation
-    AID bestProposer,ta;
-    
-    
+    AID bestProposer, ta;
+
     String current_location, next_location;
     int execution_step;
     AID resource, agv;
     boolean request_agv, ra_negotiation_done, skill_done, transport_done;
-    
-    
+
     public boolean search_resource_InDF_Done = false;
 
     @Override
@@ -57,30 +54,31 @@ public class ProductAgent extends Agent {
         this.id = (String) args[0];
         this.executionPlan = this.getExecutionList((String) args[1]);
         System.out.println("Product launched: " + this.id + " Requires: " + executionPlan);
-        
-        
+
         // TO DO: Add necessary behaviour/s for the product to control the flow
         // of its own production 
-        
         this.execution_step = 0;
         this.current_location = "Source";
-        
+
         //@hj
         this.request_agv = false;
         this.ra_negotiation_done = false;   //hj: this bool is used so we can "block" the TA call until the negotiation with RA is done
         this.transport_done = false;
         this.skill_done = false;            //hj: this bool is used so we can "block" the execution of a Skill b4 finishing transportation
-        
+
         //@HJ
         //Sequência de ações prevista: Procurar recursos -> Pedir Transporte -> Pedir Execução -> (done) -> repetir até acabar a lista
-        
         SequentialBehaviour sb = new SequentialBehaviour();
-        for(int i=0; i < executionPlan.size(); i++){
+        for (int i = 0; i < executionPlan.size(); i++) {
             //next skill -> search in DF
             sb.addSubBehaviour(new search_resource_InDF(this));
             sb.addSubBehaviour(new transport(this));
+            System.out.println("mano bro this.ra_negotiation_done " + this.ra_negotiation_done+ " ra_negotiation_done " + ra_negotiation_done);
+
             sb.addSubBehaviour(new request_skill(this));
+
             this.addBehaviour(sb);
+           
         }
 
     }
@@ -90,161 +88,153 @@ public class ProductAgent extends Agent {
         super.takeDown(); //To change body of generated methods, choose Tools | Templates.
     }
 
-     private ArrayList<String> getExecutionList(String productType){
-        switch(productType){
-            case "A": return Utilities.Constants.PROD_A;
-            case "B": return Utilities.Constants.PROD_B;
-            case "C": return Utilities.Constants.PROD_C;
+    private ArrayList<String> getExecutionList(String productType) {
+        switch (productType) {
+            case "A":
+                return Utilities.Constants.PROD_A;
+            case "B":
+                return Utilities.Constants.PROD_B;
+            case "C":
+                return Utilities.Constants.PROD_C;
         }
         return null;
     }
-     
 
-
- //***********************************************************************************************************************
+    //***********************************************************************************************************************
 //***********************************************************************************************************************
 //CN initiator    
     //@HJ
     //Referência: http://www.iro.umontreal.ca/~dift6802/jade/src/examples/protocols/ContractNetInitiatorAgent.java
-    private class CNinitiator extends ContractNetInitiator{
-            
-            public CNinitiator(Agent a, ACLMessage msg){
-                super(a, msg);
+    private class CNinitiator extends ContractNetInitiator {
+
+        public CNinitiator(Agent a, ACLMessage msg) {
+            super(a, msg);
+        }
+
+        @Override
+        protected void handleInform(ACLMessage inform) {
+
+            next_location = inform.getContent();
+            System.out.println(myAgent.getLocalName() + ": INFORM message received.\n Resource location: " + inform.getContent());
+            System.out.println("DEBUG4 current location: " + current_location + " Next Location: " + next_location);
+            if (current_location.equals(next_location)) //situação em que já estamos na localização pretendida (p.ex: duas aplicações de glue seguidas em que não precisamos de trocar de estação)
+            {
+                request_agv = false;
+            } else {
+                request_agv = true;
             }
-            
-            @Override
-            protected void handleInform(ACLMessage inform){
-                System.out.println(myAgent.getLocalName() + ": INFORM message received.\n Resource location: " + inform.getContent());
-                
-                next_location = inform.getContent();
-                
-                if(current_location.equals(next_location)) //situação em que já estamos na localização pretendida (p.ex: duas aplicações de glue seguidas em que não precisamos de trocar de estação)
-                    request_agv = false;
-                else
-                    request_agv = true;
-                
-                ra_negotiation_done = true;
+
+            System.out.println("DEBUG5 --> request_AGV: " + request_agv);
+            ra_negotiation_done = true;
+        }
+
+        @Override
+        protected void handleAllResponses(Vector responses, Vector acceptances) {
+            System.out.println(myAgent.getLocalName() + ": All PROPOSALS received");
+
+            //Evaluate proposals
+            int bestProposal = -1;
+            AID bestProposer = null;
+            ACLMessage accept = null;
+            Enumeration e = responses.elements();
+
+            while (e.hasMoreElements()) {
+
+                ACLMessage msg = (ACLMessage) e.nextElement();
+
+                if (msg.getPerformative() == ACLMessage.PROPOSE) {
+                    ACLMessage reply = msg.createReply();
+                    reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                    acceptances.addElement(reply);
+
+                    int proposal = Integer.parseInt(msg.getContent()); // to define in RA (can be a random)
+                    if (proposal > bestProposal) {
+                        bestProposal = proposal;
+                        bestProposer = msg.getSender();
+                        accept = reply;
+                    }
+                } else {
+                    System.out.println("(CFP) REFUSE received from: " + msg.getSender().getName());
+                }
             }
-            
-            @Override
-            protected void handleAllResponses(Vector responses, Vector acceptances) {
-                System.out.println(myAgent.getLocalName() + ": All PROPOSALS received");
-                
-                //Evaluate proposals
-                int bestProposal = -1;
-                AID bestProposer = null;
-                ACLMessage accept = null;
-                Enumeration e = responses.elements();
-                
-                while(e.hasMoreElements()){
-                    
-                    ACLMessage msg = (ACLMessage)e.nextElement();
-                    
-                    if(msg.getPerformative() == ACLMessage.PROPOSE){
-                        ACLMessage reply = msg.createReply();
-                        reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
-                        acceptances.addElement(reply);
-                        
-                        int proposal = Integer.parseInt(msg.getContent()); // to define in RA (can be a random)
-                        if(proposal > bestProposal){
-                            bestProposal = proposal;
-                            bestProposer = msg.getSender();
-                            accept = reply;
-                        }
-                    }
-                    else{
-                        System.out.println("(CFP) REFUSE received from: " + msg.getSender().getName());
-                    }
-                }
-                
-                //Acept best proposal
-                if(accept != null){
-                    System.out.println("Accepting proposal " + bestProposal + " from responder " + bestProposer.getName());
-                    accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                    
-                    resource = bestProposer; //so we can tell agv where it should go
-                }
-                
-                else{
-                
+
+            //Acept best proposal
+            if (accept != null) {
+                System.out.println("Accepting proposal " + bestProposal + " from responder " + bestProposer.getName());
+                accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+
+                resource = bestProposer; //so we can tell agv where it should go
+            } else {
+
                 /* //*******
                 
                     Aqui temos que arranjar maneira de agir em caso de não haver nenhuma proposta aceite.
                     Voltamos a fazer uma CFP mas agora para os agentes que já tinham respondido (array responses)
                     Uma vez que não há necessidade de voltar a procurar que agentes fazem determinado skill.
                 
-                */ //*******
-                
-                    //perform cfp
-                    ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
-                    int i=0; //debug purposes, so we can see how if the number of messages is ok
-                    while(e.hasMoreElements()){
-                        ACLMessage msg = (ACLMessage)e.nextElement();
-                        cfp.addReceiver(msg.getSender());
-                        System.out.println("Sent msg nr=" + i + " to agent" + msg.getSender() + "(CFP) ");
-                        i++;
-                    }
-            
-                    myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
-                
+                 */ //*******
+                //perform cfp
+                ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+                int i = 0; //debug purposes, so we can see how if the number of messages is ok
+                while (e.hasMoreElements()) {
+                    ACLMessage msg = (ACLMessage) e.nextElement();
+                    cfp.addReceiver(msg.getSender());
+                    System.out.println("Sent msg nr=" + i + " to agent" + msg.getSender() + "(CFP) ");
+                    i++;
                 }
-                
-  
-                
+
+                myAgent.addBehaviour(new CNinitiator(myAgent, cfp));
+
             }
-            
+
         }
-      
-    
+
+    }
+
 //CN initiator 
 //***********************************************************************************************************************
 //***********************************************************************************************************************
-    
-
- //***********************************************************************************************************************
+    //***********************************************************************************************************************
 //***********************************************************************************************************************
 //Search RA in DF
-    
     private class search_resource_InDF extends OneShotBehaviour {
-        
-    public search_resource_InDF(Agent a){
-        super(a);
-    }
 
-    @Override
-    public void action() {
-        
-        DFAgentDescription[] available_agents = null;
-        
-        try {
-            
-            System.out.println("Looking for resource: " + executionPlan.get(execution_step));
-            available_agents = DFInteraction.SearchInDFByName(executionPlan.get(execution_step),myAgent);
-        
-        } catch (FIPAException ex){
-            Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
+        public search_resource_InDF(Agent a) {
+            super(a);
         }
-        
-        if(available_agents != null){
-            //System.out.println("DEBUG1 + AVAILABLE AGENT:" + available_agents.length);
-            
-            //perform cfp
-            ACLMessage cfp= new ACLMessage(ACLMessage.CFP);
-            
-            for(int i=0; i < available_agents.length; i++){
-                cfp.addReceiver(available_agents[i].getName());
-                System.out.println("Sent msg nr=" + i + " to agent" + available_agents[i].getName() + "(CFP) ");
+
+        @Override
+        public void action() {
+
+            DFAgentDescription[] available_agents = null;
+
+            try {
+
+                System.out.println("Looking for resource: " + executionPlan.get(execution_step));
+                available_agents = DFInteraction.SearchInDFByName(executionPlan.get(execution_step), myAgent);
+
+            } catch (FIPAException ex) {
+                Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
+
+            if (available_agents != null) {
+                //System.out.println("DEBUG1 + AVAILABLE AGENT:" + available_agents.length);
+
+                //perform cfp
+                ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+
+                for (int i = 0; i < available_agents.length; i++) {
+                    cfp.addReceiver(available_agents[i].getName());
+                    System.out.println("Sent msg nr=" + i + " to agent" + available_agents[i].getName() + "(CFP) ");
+                }
+
+                myAgent.addBehaviour(new CNinitiator(myAgent, cfp));
+            } else {
+                System.out.println("Couldn't find resource: " + executionPlan.get(execution_step));
+            }
+
         }
-        
-        else{
-            System.out.println("Couldn't find resource: " + executionPlan.get(execution_step));
-        }
-        
     }
-}
 //Search RA in DF
 //***********************************************************************************************************************
 //***********************************************************************************************************************
@@ -252,7 +242,6 @@ public class ProductAgent extends Agent {
 //***********************************************************************************************************************
 //***********************************************************************************************************************
 //FIPA Request Initiator TA
-    
     private class REInitiator_ta extends AchieveREInitiator {
 
         public REInitiator_ta(Agent a, ACLMessage msg) {
@@ -269,11 +258,11 @@ public class ProductAgent extends Agent {
         @Override
         protected void handleInform(ACLMessage inform) {
             System.out.println(myAgent.getLocalName() + ": INFORM message received");
-            
-            current_location = next_location; 
+
+            current_location = next_location;
             transport_done = true;
         }
-        
+
         @Override
         protected void handleRefuse(ACLMessage refuse) {
             //falta adicionar coisas para quando o transporte é recusado
@@ -284,64 +273,58 @@ public class ProductAgent extends Agent {
 //FIPA Request Initiator TA
 //***********************************************************************************************************************
 //***********************************************************************************************************************      
-
 //***********************************************************************************************************************
 //***********************************************************************************************************************
 //Search TA in DF -> OneShotBehaviour
-
-    private class search_ta_InDF extends OneShotBehaviour{
+    private class search_ta_InDF extends OneShotBehaviour {
 
         public search_ta_InDF(Agent a) {
             super(a);
         }
 
-
         @Override
         public void action() {
-            
+
             DFAgentDescription[] available_agents = null;
-        
+
             try {
 
                 System.out.println("Looking for Transportation...");
-                available_agents = DFInteraction.SearchInDFByName("sk_move",myAgent);
+                available_agents = DFInteraction.SearchInDFByName("sk_move", myAgent);
 
-            } catch (FIPAException ex){
+            } catch (FIPAException ex) {
                 Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            if(available_agents != null){
-                
+
+            if (available_agents != null) {
+
                 System.out.println(myAgent.getLocalName() + " found TA");
 
                 ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-                
+
                 request.setContent(current_location + Constants.TOKEN + next_location);
                 request.setOntology(Constants.ONTOLOGY_MOVE);
-                
+
                 ta = available_agents[0].getName();
                 request.addReceiver(ta);
 
                 System.out.println(myAgent.getLocalName() + ": requested " + available_agents[0].getName().getLocalName());
 
                 myAgent.addBehaviour(new REInitiator_ta(myAgent, request));
-            }        
-            else
+            } else {
                 System.out.println(myAgent.getLocalName() + "Could not find TA");
-        }  
+            }
+        }
     }
-    
- 
+
 //Search TA in DF
 //***********************************************************************************************************************
 //***********************************************************************************************************************    
-    
- //***********************************************************************************************************************
+    //***********************************************************************************************************************
 //***********************************************************************************************************************
 //Transport -> Simple Behaviour
-    
-    private class transport extends SimpleBehaviour
-    {
+    private class transport extends SimpleBehaviour {
+
         private boolean finished;
 
         private transport(Agent a) {
@@ -351,43 +334,41 @@ public class ProductAgent extends Agent {
 
         @Override
         public void action() {
-            if(ra_negotiation_done){
-                if(request_agv){
+            if (ra_negotiation_done) {
+                System.out.println("DEBUG3 Action before transport --> ra_negotiation_done:" + ra_negotiation_done + " Btw request AGV: " + request_agv + "transport done" + transport_done);
+                if (request_agv) {
                     myAgent.addBehaviour(new search_ta_InDF(myAgent));
                     request_agv = false;
+                } else {
+                    transport_done = true;
                 }
-                else
-                   transport_done = true; 
-                
+
                 ra_negotiation_done = false; //clearing the variable
+                System.out.println("DEBUG3 Action After transport --> ra_negotiation_done: " + ra_negotiation_done + " Btw request AGV: " + request_agv + "transport done" + transport_done);
             }
         }
 
         @Override
         //igualzinho ao tutorial
         public boolean done() {
-            if(finished)
-                System.out.println("Transport Done.");
-            return finished;
+
+            //System.out.println("Transport Done.");
+            return true;
         }
-        
+
     }
-    
+
 //Transport
 //***********************************************************************************************************************
 //***********************************************************************************************************************
-   
-    
- //***********************************************************************************************************************
+    //***********************************************************************************************************************
 //***********************************************************************************************************************
 //FIPA Request Initiator for RA
-    
     private class REinitiator_ra extends AchieveREInitiator {
 
         public REinitiator_ra(Agent a, ACLMessage request) {
-            super(a,request);
+            super(a, request);
         }
-       
 
         @Override
         protected void handleAgree(ACLMessage agree) {
@@ -400,17 +381,14 @@ public class ProductAgent extends Agent {
             skill_done = true;
         }
     }
-    
+
 //FIPA Request Initiator for RA
 //***********************************************************************************************************************
 //***********************************************************************************************************************
-    
-    
-    
 //***********************************************************************************************************************
 //***********************************************************************************************************************
 //Execute Skill
-      private class request_skill extends SimpleBehaviour {
+    private class request_skill extends SimpleBehaviour {
 
         private boolean finished;
 
@@ -421,16 +399,16 @@ public class ProductAgent extends Agent {
 
         @Override
         public void action() {
+            // System.out.println("transport_done" + transport_done);
             if (transport_done) {
-                
+                System.out.println("bruh");
                 ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-                
+
                 request.setContent(executionPlan.get(execution_step));      //skill pretendido
                 request.addReceiver(bestProposer);                          //definido aquando da cfp
-                
-                
+
                 myAgent.addBehaviour(new REinitiator_ra(myAgent, request));
-                System.out.println("Executing Skill (productAgent Debug). Addeed behaviour FIPAInitiatiator with: " + myAgent.getName()+ "and request receiver is " + bestProposer.getName());
+                System.out.println("Executing Skill (productAgent Debug). Addeed behaviour FIPAInitiatiator with: " + myAgent.getName() + "and request receiver is " + bestProposer.getName());
 
                 transport_done = false;
                 this.finished = true;
@@ -445,5 +423,5 @@ public class ProductAgent extends Agent {
 //Execute Skill
 //***********************************************************************************************************************
 //***********************************************************************************************************************
-     
+
 }
