@@ -256,8 +256,6 @@ public class ProductAgent extends Agent {
 
         public REInitiator_ta(Agent a, ACLMessage msg) {
             super(a, msg);
-            System.out.println("Initiated FIPA REQUEST as :" + myAgent.getLocalName());
-
         }
 
         @Override
@@ -275,8 +273,16 @@ public class ProductAgent extends Agent {
         
         @Override
         protected void handleRefuse(ACLMessage refuse) {
-            //falta adicionar coisas para quando o transporte é recusado
-            //nomeadamente se já estiver ocupado noutro transporte  
+            try { 
+                Thread.sleep(2000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            //try again
+            ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+            request.setContent(current_location + Constants.TOKEN + next_location);
+            request.setOntology(Constants.ONTOLOGY_MOVE);
         }
     }
 
@@ -311,7 +317,7 @@ public class ProductAgent extends Agent {
             
             if(available_agents != null){
                 
-                System.out.println(myAgent.getLocalName() + " found TA: " + available_agents.length);
+                System.out.println(myAgent.getLocalName() + " found TA. Number of available agents: " + available_agents.length + " ; Agent found: " + available_agents[0].getName());
 
                 ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
                 
@@ -321,7 +327,7 @@ public class ProductAgent extends Agent {
                 ta = available_agents[0].getName();
                 request.addReceiver(ta);
 
-                System.out.println(myAgent.getLocalName() + ": requested " + available_agents[0].getName().getLocalName());
+                System.out.println(myAgent.getLocalName() + ": requested " + ta.getLocalName());
 
                 myAgent.addBehaviour(new REInitiator_ta(myAgent, request));
             }        
