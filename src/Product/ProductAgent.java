@@ -40,12 +40,10 @@ public class ProductAgent extends Agent {
     String id;
     ArrayList<String> executionPlan = new ArrayList<>();
     // TO DO: Add remaining attributes required for your implementation
-    AID bestProposer,ta;
-    
     
     String current_location, next_location;
     int execution_step;
-    AID resource, agv;
+    AID bestResource, agv,ta;
     boolean request_agv, ra_negotiation_done, skill_done, transport_done;
     
     
@@ -80,6 +78,7 @@ public class ProductAgent extends Agent {
             sb.addSubBehaviour(new search_resource_InDF(this));
             sb.addSubBehaviour(new transport(this));
             sb.addSubBehaviour(new request_skill(this));
+            sb.addSubBehaviour(new finish_execution_step(this));
             this.addBehaviour(sb);
         }
 
@@ -162,7 +161,7 @@ public class ProductAgent extends Agent {
                     System.out.println("Accepting proposal " + bestProposal + " from responder " + bestProposer.getName());
                     accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
                     
-                    resource = bestProposer; //so we can tell agv where it should go
+                    bestResource = bestProposer; //so we can tell agv where it should go
                 }
                 
                 else{
@@ -356,19 +355,22 @@ public class ProductAgent extends Agent {
                     myAgent.addBehaviour(new search_ta_InDF(myAgent));
                     request_agv = false;
                 }
-                else
+                else{
                    transport_done = true; 
+                }
                 
                 ra_negotiation_done = false; //clearing the variable
+                this.finished = true;
             }
         }
 
         @Override
         //igualzinho ao tutorial
         public boolean done() {
-            if(finished)
-                System.out.println("Transport Done.");
-            return finished;
+            //if(this.finished){
+                //System.out.println("Transport done or not necessary.");
+                return this.finished;
+            //}
         }
         
     }
@@ -426,11 +428,12 @@ public class ProductAgent extends Agent {
                 ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
                 
                 request.setContent(executionPlan.get(execution_step));      //skill pretendido
-                request.addReceiver(bestProposer);                          //definido aquando da cfp
+                request.addReceiver(bestResource);                          //definido aquando da cfp
                 
                 
                 myAgent.addBehaviour(new REinitiator_ra(myAgent, request));
-                System.out.println("Executing Skill (productAgent Debug). Addeed behaviour FIPAInitiatiator with: " + myAgent.getName()+ "and request receiver is " + bestProposer.getName());
+                System.out.println("se for aqui nem ta mau");
+                System.out.println("Executing Skill (productAgent Debug). Addeed behaviour FIPAInitiatiator with: " + myAgent.getLocalName()+ "and request receiver is " + bestResource.getLocalName());
 
                 transport_done = false;
                 this.finished = true;
@@ -446,4 +449,39 @@ public class ProductAgent extends Agent {
 //***********************************************************************************************************************
 //***********************************************************************************************************************
      
+
+
+//***********************************************************************************************************************
+//***********************************************************************************************************************
+// Wait for the skill execution to be done
+      
+    private class finish_execution_step extends SimpleBehaviour {
+
+        private boolean finished = false;
+
+        public finish_execution_step(Agent a) {
+            super(a);
+        }
+
+        @Override
+        public void action() {
+            if (skill_done) {
+                System.out.println(myAgent.getLocalName() + " finished execution step: " + executionPlan.get(execution_step) + "\n");
+
+                skill_done = false;
+                execution_step++;
+                this.finished = true;
+            }
+        }
+
+        @Override
+        public boolean done() {
+            return this.finished;
+        }
+    }
+
+// Wait for the skill execution to be done
+//***********************************************************************************************************************
+//***********************************************************************************************************************
+
 }
