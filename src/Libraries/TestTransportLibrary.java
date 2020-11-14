@@ -15,7 +15,7 @@ public class TestTransportLibrary implements ITransport {
     @Override
     public void init(Agent a) {
         this.myAgent = a;
-        System.out.println("Test library has been successfully initialized for agent: " + this.myAgent.getLocalName());
+        //System.out.println("Test library has been successfully initialized for agent: " + this.myAgent.getLocalName());
     }
     
 

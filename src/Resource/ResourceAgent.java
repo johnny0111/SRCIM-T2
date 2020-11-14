@@ -104,11 +104,11 @@ public class ResourceAgent extends Agent {
                 msg.setPerformative(ACLMessage.PROPOSE);
                 String proposal = Integer.toString((int) Math.random()); //Random because we need them to be different, so we can chose, and tell them appart;
                 msg.setContent(proposal);
-                System.out.println(this.getAgent().getName() + ": sent CFP PROPOSAL to " + cfp.getSender().getName());
+                System.out.println(this.getAgent().getLocalName() + ": sent CFP PROPOSAL to " + cfp.getSender().getLocalName());
             }
             else{
                 msg.setPerformative(ACLMessage.REFUSE);
-                System.out.println(this.getAgent().getName() + ": sent CFP REFUSE to " + cfp.getSender().getName());
+                System.out.println(this.getAgent().getLocalName() + ": sent CFP REFUSE to " + cfp.getSender().getLocalName());
             }
 
             return msg;
@@ -119,21 +119,15 @@ public class ResourceAgent extends Agent {
         @Override
         protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) throws FailureException {
             System.out.println(myAgent.getLocalName() + ": CFP PROPOSAL accepted by: " + cfp.getSender().getLocalName()+ " executing: " + id);
-            //block(2000);
+      
             ACLMessage msg = cfp.createReply();
             msg.setPerformative(ACLMessage.INFORM);
-//            msg.getSender();
-//            
-//            
+         
             msg.addReceiver(cfp.getSender());
-            //@HJ
-            //faz sentido este setContent? @Amaral - Sim, esta location vais mandar para o Agent de transport
             
-            //@Amaral
             msg.setContent(location);
             
-            //Not sure if we should make availability false here  (before the transport to location) 
-            //or only when executing. As of Today (09/11) we have on both spots
+            
             isAvailable = false;        
             //depois de executar o skill voltamos a meter a true
            
@@ -145,7 +139,7 @@ public class ResourceAgent extends Agent {
        
     }
     
-    //@Amaral
+
     /*============================================
     //Fipa Responder Regarding Resource's Request's
     At at first, it Prints out an Agree Notification
@@ -183,17 +177,15 @@ public class ResourceAgent extends Agent {
             msg.setContent(request.getContent());
             
             
-            //@AMARAL - This False is supposed to Already be false, but let's make sure it is, here
+            //This False is supposed to Already be false, but let's make sure it is, here
             //We should also check here, if the Product is already at the right Location, or maybe only Request when so
             
             isAvailable = false;
-            System.out.println("B4 execute skill ||| "+this.myAgent.getLocalName()+"Is currently unavailable");
-            
+                       
             //Message Request Content MUST be skill_ID, or else it won't work, be careful  not to change it elsewhere
             myLib.executeSkill(msg.getContent());
             isAvailable = true;
-            System.out.println("After execute skill ||| "+this.myAgent.getLocalName()+"is currently Available");
-            
+                        
             //Esta variavel controla o CFP
             
             

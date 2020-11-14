@@ -158,7 +158,7 @@ public class ProductAgent extends Agent {
                 
                 //Acept best proposal
                 if(accept != null){
-                    System.out.println("Accepting proposal " + bestProposal + " from responder " + bestProposer.getName());
+                    System.out.println("Accepting proposal " + bestProposal + " from responder " + bestProposer.getLocalName());
                     accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
                     
                     bestResource = bestProposer; //so we can tell agv where it should go
@@ -180,7 +180,7 @@ public class ProductAgent extends Agent {
                     while(e.hasMoreElements()){
                         ACLMessage msg = (ACLMessage)e.nextElement();
                         cfp.addReceiver(msg.getSender());
-                        System.out.println("Sent msg nr=" + i + " to agent" + msg.getSender() + "(CFP) ");
+                        System.out.println("Sent msg nr=" + i + " to agent" + msg.getSender().getLocalName() + "(CFP) ");
                         i++;
                     }
             
@@ -232,7 +232,7 @@ public class ProductAgent extends Agent {
             
             for(int i=0; i < available_agents.length; i++){
                 cfp.addReceiver(available_agents[i].getName());
-                System.out.println("Sent msg nr=" + i + " to agent" + available_agents[i].getName() + "(CFP) ");
+                System.out.println("Sent msg nr: " + (i+1) + " to agent" + available_agents[i].getName().getLocalName()+ "(CFP) ");
             }
             
             myAgent.addBehaviour(new CNinitiator(myAgent,cfp));
@@ -323,7 +323,7 @@ public class ProductAgent extends Agent {
                 request2.addReceiver(ta);
                 
                     request2.getAllReceiver().next().toString();
-                    System.out.println("mano bro caralho fdp e bom que funciones" + request2.getAllReceiver().next().toString());
+                    
                 
 
                 System.out.println(myAgent.getLocalName() + ": requested " + available_agents[0].getName().getLocalName() /*+ /*"deixa imprimir: " +request.getAllReceiver().*/);
@@ -437,9 +437,7 @@ public class ProductAgent extends Agent {
                 
                 
                 myAgent.addBehaviour(new REinitiator_ra(myAgent, request));
-                System.out.println("se for aqui nem ta mau: " + bestResource.toString() );
-                System.out.println("Executing Skill (productAgent Debug). Addeed behaviour FIPAInitiatiator with: " + myAgent.getLocalName()+ "and request receiver is " + bestResource.getLocalName());
-
+                
                 transport_done = false;
                 this.finished = true;
             }

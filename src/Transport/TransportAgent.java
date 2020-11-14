@@ -51,7 +51,7 @@ public class TransportAgent extends Agent {
             Object instance;
             instance = cls.newInstance();
             myLib = (ITransport) instance;
-            System.out.println(instance);
+            //System.out.println(instance);
         
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(TransportAgent.class.getName()).log(Level.SEVERE, null, ex);
@@ -64,7 +64,7 @@ public class TransportAgent extends Agent {
         //Register in DF
         try {
             DFInteraction.RegisterInDF(this,this.associatedSkills,Constants.DFSERVICE_RESOURCE); //DFInteraction.RegisterInDF(this, associatedSkills, id);
-            if(Constants.DEBUG)System.out.println("Registered in DF " + this.getLocalName() + "SKILLS:" + Arrays.toString(this.associatedSkills));
+            //if(Constants.DEBUG)System.out.println("Registered in DF " + this.getLocalName() + " SKILLS: " + Arrays.toString(this.associatedSkills));
         
         } catch (FIPAException ex) {
             Logger.getLogger(ResourceAgent.class.getName()).log(Level.SEVERE, null, ex);
@@ -85,12 +85,12 @@ public class TransportAgent extends Agent {
         
         public responder(Agent a, MessageTemplate mt){
             super(a, mt);
-            System.out.println(myAgent.getLocalName() + "(TA): Called to action Request from: ");
+            //System.out.println(myAgent.getLocalName() + "is  Responder ");
             
         }
         @Override
         protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException{
-            System.out.println(myAgent.getLocalName() + "(TA): Received Transportation Request from: " + request.getSender().getName());
+            System.out.println(myAgent.getLocalName() + "(TA): Received Transportation Request from: " + request.getSender().getLocalName());
             ACLMessage msg = request.createReply();
             
             if(isAvailable){
@@ -102,11 +102,11 @@ public class TransportAgent extends Agent {
                 dest_position = st.nextToken();
                 
                 msg.setPerformative(ACLMessage.AGREE);
-                System.out.println(myAgent.getLocalName() + "(TA): sent AGREE to: " + request.getSender().getName());
+                System.out.println(myAgent.getLocalName() + "(TA): sent AGREE to: " + request.getSender().getLocalName());
 
             }else{
                 msg.setPerformative(ACLMessage.REFUSE);
-                System.out.println(myAgent.getLocalName() + "(TA): sent REFUSE to: " + request.getSender().getName());
+                System.out.println(myAgent.getLocalName() + "(TA): sent REFUSE to: " + request.getSender().getLocalName());
 
             }
             
@@ -117,17 +117,13 @@ public class TransportAgent extends Agent {
         protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException{
             System.out.println(myAgent.getLocalName() + ": Preparing results of transportation REQUEST");
             
-            //@HJ
-            //ver isto (no código do Pedro está assim mas a função que está
-            //definida em ITranspor.java só tem 2 argumentos de entrada
-            //myLib.executeMove(initial_position, dest_position, id);
             
             myLib.executeMove(initial_position, dest_position);
             
             ACLMessage msg = request.createReply();
             msg.setPerformative(ACLMessage.INFORM);
             
-            System.out.println(myAgent.getLocalName() + " (TA): Performed MOVE operation to: " + request.getSender());
+            System.out.println(myAgent.getLocalName() + " (TA): Performed MOVE operation to: " + request.getSender().getLocalName());
             isAvailable = true;
             
             return msg;

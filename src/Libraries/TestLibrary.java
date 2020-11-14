@@ -15,13 +15,13 @@ public class TestLibrary implements IResource {
     @Override
     public void init(Agent myAgent) {
         this.myAgent = myAgent;
-        System.out.println("Test library has been successfully initialized for agent: " + myAgent.getLocalName());
+        //System.out.println("Test library has been successfully initialized for agent: " + myAgent.getLocalName());
     }
 
     @Override
     public boolean executeSkill(String skillID) {
         try {
-            System.out.println("DEBUG2 Executing: " + skillID);
+            System.out.println("Executing: " + skillID);
             switch (skillID) {
                 case Utilities.Constants.SK_GLUE_TYPE_A: {
                     Thread.sleep(2000);
