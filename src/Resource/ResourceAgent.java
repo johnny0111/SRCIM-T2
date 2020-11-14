@@ -74,13 +74,6 @@ public class ResourceAgent extends Agent {
         }
 
         // TO DO: Add responder behaviour/s
-        
-//        SequentialBehaviour sb = new SequentialBehaviour();
-        //@AMARAl
-        //Nota do Professor - Alterar de Sequencial para nao prender no CFP
-//        sb.addSubBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
-//        sb.addSubBehaviour(new FIPAresponder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
-//        this.addBehaviour(sb);
 
         //@Amaral
         //Changed to Normal From Sequential because he was getting stuck at CFP call                        

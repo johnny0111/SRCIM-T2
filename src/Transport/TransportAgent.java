@@ -16,6 +16,7 @@ import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.proto.AchieveREResponder;
 import Libraries.ITransport;
+import java.util.StringTokenizer;
 /**
  *
  * @prof: Ricardo Silva Peres <ricardo.peres@uninova.pt>
@@ -90,11 +91,11 @@ public class TransportAgent extends Agent {
             
             if(isAvailable){
                 
-//                if(!"Spawn".equals(location)){
-//                    myLib.executeMove(location, "Spawn");
-//                }
-                
                 isAvailable=false;
+                
+                StringTokenizer st = new StringTokenizer(request.getContent(), Constants.TOKEN);
+                initial_position = st.nextToken();
+                dest_position = st.nextToken();
                 
                 msg.setPerformative(ACLMessage.AGREE);
                 System.out.println(myAgent.getLocalName() + "(TA): sent AGREE to: " + request.getSender().getName());
@@ -116,6 +117,8 @@ public class TransportAgent extends Agent {
             //ver isto (no código do Pedro está assim mas a função que está
             //definida em ITranspor.java só tem 2 argumentos de entrada
             //myLib.executeMove(initial_position, dest_position, id);
+            
+            myLib.executeMove(initial_position, dest_position);
             
             ACLMessage msg = request.createReply();
             msg.setPerformative(ACLMessage.INFORM);

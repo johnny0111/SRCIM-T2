@@ -66,8 +66,8 @@ public class ProductAgent extends Agent {
         //@hj
         this.request_agv = false;
         this.ra_negotiation_done = false;   //hj: this bool is used so we can "block" the TA call until the negotiation with RA is done
-        this.transport_done = false;
-        this.skill_done = false;            //hj: this bool is used so we can "block" the execution of a Skill b4 finishing transportation
+        this.transport_done = false;        //hj: this bool is used so we can "block" the execution of a Skill b4 finishing transportation
+        this.skill_done = false;            //hj: this bool is used so we can "block" the next iteration of the sequential behaviour
         
         //@HJ
         //Sequência de ações prevista: Procurar recursos -> Pedir Transporte -> Pedir Execução -> (done) -> repetir até acabar a lista
@@ -303,7 +303,7 @@ public class ProductAgent extends Agent {
             try {
 
                 System.out.println("Looking for Transportation...");
-                available_agents = DFInteraction.SearchInDFByName("sk_move",myAgent);
+                available_agents = DFInteraction.SearchInDFByName("sk_move", myAgent);
 
             } catch (FIPAException ex){
                 Logger.getLogger(ProductAgent.class.getName()).log(Level.SEVERE, null, ex);
@@ -311,7 +311,7 @@ public class ProductAgent extends Agent {
             
             if(available_agents != null){
                 
-                System.out.println(myAgent.getLocalName() + " found TA");
+                System.out.println(myAgent.getLocalName() + " found TA: " + available_agents.length);
 
                 ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
                 
