@@ -4,9 +4,9 @@ import requests
 
 mypath = os.path.dirname(os.path.abspath(__file__))
 mypath_images = mypath
-mypath_images += "\img1.jpg"
+mypath_images += "\product9.jpg"
 
-url = 'http://127.0.0.1:5000/im_size'
+url = 'http://127.0.0.1:5000/'
 my_img = {'image': open(mypath_images, 'rb')}
 r = requests.post(url, files=my_img)
 
