@@ -1,6 +1,7 @@
 # on terminal:
 # C:\path\to\app>set FLASK_APP=hello.py
 
+"""
 from flask import Flask
 app = Flask(__name__)
 
@@ -10,10 +11,10 @@ def hello_world():
 
 if __name__ == '__main__':
     app.run() 
+"""
  
-
-""" from flask import Flask, request, jsonify
-from tkinter import Image
+from flask import Flask, request, jsonify
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -22,8 +23,12 @@ def process_image():
     file = request.files['image']
     # Read the image via file.stream
     img = Image.open(file.stream)
+    file.save('im-received.jpg')
+
+
     return jsonify({'msg': 'success', 'size': [img.width, img.height]})
 
 
 if __name__ == "__main__":
-    app.run(debug=True) """
+    #app.run(debug=True)
+    app.run()
