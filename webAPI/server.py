@@ -10,9 +10,10 @@ def hello_world():
 if __name__ == '__main__':
     app.run() 
 """
-import os, h5py
+import os
 import tensorflow as tf
 import numpy
+from werkzeug import utils
 from flask import Flask, request, jsonify
 from PIL import Image
 
@@ -33,25 +34,49 @@ def process_image():
     # Documentation: https://www.tensorflow.org/api_docs/python/tf/keras/models/load_model
     model = tf.keras.models.load_model(model_file_name, custom_objects=None, compile=True, options=None)
 
-    file = request.files['image']
+    # Upload single file of tyoe 'image' 
+    #file = request.files['image']
     # Read the image via file.stream
-    img = Image.open(file.stream)
+    #img = Image.open(file.stream)
 
     # Save image
-    # img_path = mypath + 'received.jpg'
+    #img_path = mypath + 'received.jpg'
     #file.save(img_path)
 
-    # Pre-process image before prediction
-    img = tf.keras.preprocessing.image.load_img(file.stream, target_size=(224, 224))
-    img_array = tf.keras.preprocessing.image.img_to_array(img) / 255
-    img_array = tf.expand_dims(img_array, 0) # Create a batch
 
+    """ 
+    *** Upload several files ***
+
+        uploaded_files = request.files.getlist("file")
+        i=0
+        for i, elem in enumerate(uploaded_files):
+            filename = utils.secure_filename(uploaded_files[i].filename)
+            print("\nReceived image File name : " + uploaded_files[i].filename)
+            mypath_save = os.path.dirname(os.path.abspath(__file__)) + filename
+            uploaded_files[i].save(mypath_save)
+    """
+
+    # We'll save the image instead of read it directly  from the file stream
+    # since it was giving us some problems
+
+    uploaded_file = request.files['file']
+    filename = utils.secure_filename(uploaded_file.filename)
+    print("\nReceived image File name : " + uploaded_file.filename)
+    mypath_save = os.path.dirname(os.path.abspath(__file__)) + filename
+    uploaded_file.save(mypath_save)
+
+
+    # Pre-process image before prediction
+    # Documentation: https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/load_img
     # Prediction
     # Documentation: https://www.tensorflow.org/api_docs/python/tf/keras/Model#predict
-    output = model.predict(img_array)
-    output_str = numpy.array2string(output)
+    img = tf.keras.preprocessing.image.load_img(mypath_save, target_size=(224, 224))
+    img_array = tf.keras.preprocessing.image.img_to_array(img) / 255
+    img_array = tf.expand_dims(img_array, 0) # Create a batch
+    prediction = model.predict(img_array)
+    prediction_str = numpy.array2string(prediction)
 
-    return jsonify({'msg': 'success', 'output': output_str})
+    return jsonify({'msg': 'success', 'output': prediction_str})
 
 
 if __name__ == "__main__":
