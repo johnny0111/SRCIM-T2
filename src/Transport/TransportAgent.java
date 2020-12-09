@@ -119,7 +119,8 @@ public class TransportAgent extends Agent {
             System.out.println(myAgent.getLocalName() + ": Preparing results of transportation REQUEST");
             
             
-            myLib.executeMove(initial_position, dest_position, request.getSender().getName());
+            //myLib.executeMove(initial_position, dest_position, request.getSender().getLocalName());
+            myLib.executeMove(initial_position, dest_position, request.getSender().getLocalName());
             
             ACLMessage msg = request.createReply();
             msg.setPerformative(ACLMessage.INFORM);
