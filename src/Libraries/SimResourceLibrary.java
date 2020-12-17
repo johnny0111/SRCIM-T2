@@ -5,12 +5,19 @@
  */
 package Libraries;
 
+import Utilities.Constants;
+import Utilities.MultipartRequestUtility;
 import coppelia.CharWA;
 import coppelia.IntW;
 import coppelia.remoteApi;
 import jade.core.Agent;
+
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
@@ -56,6 +63,28 @@ public class SimResourceLibrary implements IResource {
             }
         }
         sim.simxClearIntegerSignal(clientID, myAgent.getLocalName(), sim.simx_opmode_blocking);
+
+        if(skillID.equalsIgnoreCase(Constants.SK_QUALITY_CHECK)) {
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            // TO DO: Modify the postImage method to return the result of the quality control. This can then be
+            // used to adapt the control logic (product execution) based on the result.
+            switch(this.myAgent.getLocalName()){
+                // TO DO: example: call postImage for each station case with the corresponding image path.
+                // The simulation should store images in the images folder with the name of the station + .jpg.
+                // e.g. "images/QualityControlStation1.jpg"
+                case "QualityControlStation1": /*TBD*/
+                    postImage("images/QualityControlStation1.jpg");
+                    break;
+                case "QualityControlStation2": /*TBD*/ 
+                    postImage("images/QualityControlStation2.jpg");
+                    break;
+            }
+        }
+
         if (opRes.getValue() == 1) {
             return true;
         }
@@ -92,5 +121,33 @@ public class SimResourceLibrary implements IResource {
         }
         return null;
     }
+
+    void postImage(String imgPath){
+        String charset = "UTF-8";
+        // TO DO: Add your server endpoint for the quality check
+        String requestURL = "http://localhost:5000/"; //- END Point API
+        File imageFile = new File(imgPath);
+
+        try {
+            MultipartRequestUtility request = new MultipartRequestUtility(requestURL, charset);
+            // TO DO: add the image file to the request (key/value pair separated by a comma similar to the Python
+            // example in the supporting material)
+            
+            //request.addFilePart(/*TBD*/);
+            request.addFilePart("file", imageFile);
+            List<String> response = request.finish();
+            
+            System.out.println(response);
+           
+            // TO DO: For the first version simply print the response. Then, add the logic to return the result of
+            // the quality test to enable the adaptation of the product's execution in case of defect.
+            
+        } catch (IOException ex) {
+            System.err.println(ex);
+        }
+
+
+    }
+
 
 }

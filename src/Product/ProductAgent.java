@@ -76,9 +76,9 @@ public class ProductAgent extends Agent {
             sb.addSubBehaviour(new transport(this));
             sb.addSubBehaviour(new request_skill(this));
             sb.addSubBehaviour(new finish_execution_step(this));
-            this.addBehaviour(sb);
+            
         }
-
+        this.addBehaviour(sb);  
     }
 
     @Override
@@ -410,6 +410,13 @@ public class ProductAgent extends Agent {
         protected void handleInform(ACLMessage inform) {
             System.out.println(myAgent.getLocalName() + ": INFORM message received from: " + inform.getSender().getLocalName());
             skill_done = true;
+//        if(skill == quality){
+//            if (skill_quality() == false){
+//                //change (i) in execution plane
+//                add.behaviour(1,2,3,4);
+//            }
+//        }
+//        
         }
     }
     
