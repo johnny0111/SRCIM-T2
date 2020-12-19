@@ -56,6 +56,8 @@ def process_image():
             uploaded_files[i].save(mypath_save)
     """
 
+    # Prof will only ask for one at a time
+
     # We'll save the image instead of read it directly  from the file stream
     # since it was giving us some problems
 

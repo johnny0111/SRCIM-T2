@@ -145,7 +145,6 @@ public class MultipartRequestUtility {
         } else {
             throw new IOException("Server returned non-OK status: " + status);
         }
-
         return response;
     }
 }
