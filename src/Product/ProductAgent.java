@@ -410,8 +410,10 @@ public class ProductAgent extends Agent {
         protected void handleInform(ACLMessage inform) {
             System.out.println(myAgent.getLocalName() + ": INFORM message received from: " + inform.getSender().getLocalName());
             skill_done = true;
-            
+            //{"msg":"success","output":"[[9.9998879e-01 1.1246257e-05]]"}
+            String prediction = inform.getContent();
             System.out.println("[" + inform.getContent() +"]" );
+            
             
 // TODO  
 //        if(skill == quality){
