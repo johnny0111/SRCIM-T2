@@ -191,12 +191,12 @@ public class ResourceAgent extends Agent {
                 if(!myLib.executeSkill(msg.getContent())){ //and execution fails aka Defect product
                     
                     //Then Recover the product
-                    System.out.println("Defective Product detected");
+                    
                     msg.setContent("QualityFail");
                 }
                 else {
                     
-                    System.out.println("MAS TIPO PODIAS TER FALHADO!!! e já agora só para nao me borrar" + myAgent.getLocalName());
+                    
                 }
                     
             }
