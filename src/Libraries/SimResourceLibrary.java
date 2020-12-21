@@ -86,7 +86,7 @@ public class SimResourceLibrary implements IResource {
                     break;
             }
         }
-        opRes.setValue(0); //TODO @AMARAL TIRA ISTO PARA ELE DEIXAR DE DIZER QUE TODAS AS AÇOES ESTÂO ERRADAS
+        //opRes.setValue(0); //TODO @AMARAL TIRA ISTO PARA ELE DEIXAR DE DIZER QUE TODAS AS AÇOES ESTÂO ERRADAS
         if (opRes.getValue() == 1) {
             return true;
         }
@@ -151,13 +151,13 @@ public class SimResourceLibrary implements IResource {
             
             
             if (prediction.contains("\"NOK\"")){
-                System.out.println("This product has a Defect ||| I am: " + myAgent.getLocalName());
+                System.out.println("Quality Control Result from: " + myAgent.getLocalName() + ": NOT OK ");
                 return false; //This false then controls Execution skill boolean output
             
                 
             }
             else if (prediction.contains("\"OK\"")){
-                System.out.println("This product seems to be alright ||| I am: " + myAgent.getLocalName());
+                System.out.println("Quality Control Result from: " + myAgent.getLocalName() + ": OK ");
                 return true;
 
             }

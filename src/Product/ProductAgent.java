@@ -73,7 +73,7 @@ public class ProductAgent extends Agent {
         
         //Sequência de ações prevista: Procurar recursos -> Pedir Transporte -> Pedir Execução -> (done) -> repetir até acabar a lista
         SequentialBehaviour sb = new SequentialBehaviour();
-        for(int i=0; i < executionPlan.size(); i++){
+        for(int i=0; i < executionPlan.size()-1; i++){ //this is because we only want to queue drop after sk_q_c
             //next skill -> search in DF
             sb.addSubBehaviour(new search_resource_InDF(this));
             sb.addSubBehaviour(new transport(this));
@@ -438,15 +438,7 @@ public class ProductAgent extends Agent {
                 
             }
             skill_done = true;
-
-            
-//          TODO  
-//              if(skill == quality){
-//            if (skill_quality() == false){
-//                //change (i) in execution plane
-//                add.behaviour(1,2,3,4);
-//            }
-//          }        
+      
         }
     }
     
@@ -520,14 +512,14 @@ public class ProductAgent extends Agent {
                 
                 
                 if(quality_check == false && recovery_tried == false && execution_step == 4){
-                    System.out.println("---IDK what im doing---");
+                    System.out.println("Recovery Initiated");
                     quality_check=true;
                     recovery_tried = true;
                     execution_step = 1;
                     
 
                     SequentialBehaviour sb2 = new SequentialBehaviour();
-                    for(int i=1; i < executionPlan.size() -1 ; i++){ //same thing as in the begging. However we reduced the size by 2 (aka pick up and Drop
+                    for(int i=1; i < executionPlan.size()-1  ; i++){ //same thing as in the begging. However we reduced the size by 2 (aka pick up and Drop
                         //next skill -> search in DF
                         sb2.addSubBehaviour(new search_resource_InDF(this.getAgent()));
                         sb2.addSubBehaviour(new transport(this.getAgent()));
@@ -537,7 +529,19 @@ public class ProductAgent extends Agent {
                     }
                     addBehaviour(sb2); 
                 }
+                else if(execution_step == 4){ // the 
+                      SequentialBehaviour sb3 = new SequentialBehaviour();
+                      sb3.addSubBehaviour(new search_resource_InDF(this.getAgent()));
+                      sb3.addSubBehaviour(new transport(this.getAgent()));
+                      sb3.addSubBehaviour(new request_skill(this.getAgent()));
+                      sb3.addSubBehaviour(new finish_execution_step(this.getAgent()));
+                      addBehaviour(sb3); 
+                  }
+                
+                
+                
                 this.finished = true;
+                
             }
             
         }
