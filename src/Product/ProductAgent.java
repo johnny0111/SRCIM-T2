@@ -412,9 +412,11 @@ public class ProductAgent extends Agent {
             skill_done = true;
             //{"msg":"success","output":"[[9.9998879e-01 1.1246257e-05]]"}
             String prediction = inform.getContent();
-            System.out.println("[" + inform.getContent() +"]" );
             
-            
+            String segments[] = prediction.split(":");
+            // Grab the last segment
+            prediction = segments[segments.length - 1];
+            System.out.println(prediction);
 // TODO  
 //        if(skill == quality){
 //            if (skill_quality() == false){

@@ -6,9 +6,10 @@ import requests
 mypath = os.path.dirname(os.path.abspath(__file__))
 mypath_images = mypath
 
-""" mypath_images += "\product9.jpg" """
-mypath_images += "/product9.jpg"
-mypath_images = "D:/faculdade/SRCIM/GitHub/SRCIM-T2/webAPI/product9.jpg"
+""" mypath_images += "\product11.jpg" """
+mypath_images += "/product10.jpg"
+mypath_images = "D:/faculdade/SRCIM/GitHub/SRCIM-T2/webAPI/product1.jpg"
+
 print(mypath_images)
 
 url = 'http://127.0.0.1:5000/'

@@ -27,7 +27,7 @@ def process_image():
     mypath_images = mypath
     
     # Append file name
-    model_file_name = mypath + '\srcim_model.h5'
+    model_file_name = mypath + '\srcim_model2.h5'
 
     # Read the model -> this is the right way to import a fully saved Keras model
     # Reference: https://stackoverflow.com/questions/35074549/how-to-load-a-model-from-an-hdf5-file-in-keras
@@ -76,8 +76,13 @@ def process_image():
     img_array = tf.keras.preprocessing.image.img_to_array(img) / 255
     img_array = tf.expand_dims(img_array, 0) # Create a batch
     prediction = model.predict(img_array)
-    prediction_str = numpy.array2string(prediction)
-
+    if(prediction[0][0] < 0.80):
+        prediction_str = "OK"
+    
+    else :
+        prediction_str = "NOK"
+        """ prediction_str = numpy.array2string(prediction) """
+    
     return jsonify({'msg': 'success', 'output': prediction_str})
 
 
