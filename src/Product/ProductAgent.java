@@ -43,6 +43,7 @@ public class ProductAgent extends Agent {
     
     String current_location, next_location;
     int execution_step;
+    boolean recovery_tried, quality_check;
     AID bestResource, agv,ta;
     boolean request_agv, ra_negotiation_done, skill_done, transport_done;
     
@@ -63,6 +64,8 @@ public class ProductAgent extends Agent {
         this.execution_step = 0;
         this.current_location = "Source";
         
+        this.quality_check = true;
+        this.recovery_tried = false;
         this.request_agv = false;
         this.ra_negotiation_done = false;   //hj: this bool is used so we can "block" the TA call until the negotiation with RA is done
         this.transport_done = false;        //hj: this bool is used so we can "block" the execution of a Skill b4 finishing transportation
@@ -112,7 +115,7 @@ public class ProductAgent extends Agent {
             
             @Override
             protected void handleInform(ACLMessage inform){
-                System.out.println(myAgent.getLocalName() + ": INFORM message received.");
+                System.out.println(myAgent.getLocalName() + ": INFORM message received. TODO Next Location: "+ inform.getContent());
                 
                 next_location = inform.getContent();
                 
@@ -409,21 +412,41 @@ public class ProductAgent extends Agent {
         @Override
         protected void handleInform(ACLMessage inform) {
             System.out.println(myAgent.getLocalName() + ": INFORM message received from: " + inform.getSender().getLocalName());
-            skill_done = true;
-            //{"msg":"success","output":"[[9.9998879e-01 1.1246257e-05]]"}
-            String prediction = inform.getContent();
             
-            String segments[] = prediction.split(":");
-            // Grab the last segment
-            prediction = segments[segments.length - 1];
-            System.out.println(prediction);
-// TODO  
-//        if(skill == quality){
+            if(inform.getContent().equalsIgnoreCase("QualityFail")){
+                quality_check = false;
+//                if(!recovery_tried){
+//                   recovery_tried = true;
+//                    execution_step = 1;
+//                    System.out.println("IDK what im doing");
+//                   
+//                    SequentialBehaviour sb = new SequentialBehaviour();
+//                    for(int i=1; i < executionPlan.size(); i++){
+//                        //next skill -> search in DF
+//                        sb.addSubBehaviour(new search_resource_InDF(this.getAgent()));
+//                        sb.addSubBehaviour(new transport(this.getAgent()));
+//                        sb.addSubBehaviour(new request_skill(this.getAgent()));
+//                        sb.addSubBehaviour(new finish_execution_step(this.getAgent()));
+//                         
+//                   }
+//                    addBehaviour(sb); 
+        
+//                }
+//                else 
+//                    System.out.println("Recovery tried already, most likely it's ruined already");
+//                
+                
+            }
+            skill_done = true;
+
+            
+//          TODO  
+//              if(skill == quality){
 //            if (skill_quality() == false){
 //                //change (i) in execution plane
 //                add.behaviour(1,2,3,4);
 //            }
-//        }        
+//          }        
         }
     }
     
@@ -488,15 +511,35 @@ public class ProductAgent extends Agent {
         @Override
         public void action() {
             if (skill_done) {
-                System.out.println(myAgent.getLocalName() + " finished execution step: " + executionPlan.get(execution_step) + "\n");
+                System.out.println(myAgent.getLocalName() + " finished execution number: "+execution_step+" step: " + executionPlan.get(execution_step) + "\n");
                 if(executionPlan.get(execution_step).equals("sk_drop")){
                     System.out.println("The manufacture of " + myAgent.getLocalName()  +" has been completed with SUCCESS!");
                 }
                 skill_done = false;
                 execution_step++;
-                this.finished = true;
                 
+                
+                if(quality_check == false && recovery_tried == false && execution_step == 4){
+                    System.out.println("---IDK what im doing---");
+                    quality_check=true;
+                    recovery_tried = true;
+                    execution_step = 1;
+                    
+
+                    SequentialBehaviour sb2 = new SequentialBehaviour();
+                    for(int i=1; i < executionPlan.size() -1 ; i++){ //same thing as in the begging. However we reduced the size by 2 (aka pick up and Drop
+                        //next skill -> search in DF
+                        sb2.addSubBehaviour(new search_resource_InDF(this.getAgent()));
+                        sb2.addSubBehaviour(new transport(this.getAgent()));
+                        sb2.addSubBehaviour(new request_skill(this.getAgent()));
+                        sb2.addSubBehaviour(new finish_execution_step(this.getAgent()));
+
+                    }
+                    addBehaviour(sb2); 
+                }
+                this.finished = true;
             }
+            
         }
 
         @Override

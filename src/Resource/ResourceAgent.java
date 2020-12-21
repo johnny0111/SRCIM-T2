@@ -185,7 +185,24 @@ public class ResourceAgent extends Agent {
             isAvailable = false;
                        
             //Message Request Content MUST be skill_ID, or else it won't work, be careful  not to change it elsewhere
-            myLib.executeSkill(msg.getContent());
+            
+            if(myAgent.getLocalName().equals("QualityControlStation2") || myAgent.getLocalName().equals("QualityControlStation1")){
+                
+                if(!myLib.executeSkill(msg.getContent())){ //and execution fails aka Defect product
+                    
+                    //Then Recover the product
+                    System.out.println("Defective Product detected");
+                    msg.setContent("QualityFail");
+                }
+                else {
+                    
+                    System.out.println("MAS TIPO PODIAS TER FALHADO!!! e já agora só para nao me borrar" + myAgent.getLocalName());
+                }
+                    
+            }
+            else{
+                myLib.executeSkill(msg.getContent());
+            }
             isAvailable = true;
                         
             //Esta variavel controla o CFP

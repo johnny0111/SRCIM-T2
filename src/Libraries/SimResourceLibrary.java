@@ -77,14 +77,16 @@ public class SimResourceLibrary implements IResource {
                 // The simulation should store images in the images folder with the name of the station + .jpg.
                 // e.g. "images/QualityControlStation1.jpg"
                 case "QualityControlStation1": /*TBD*/
-                    postImage("images/QualityControlStation1.jpg");
+                    if(!postImage("images/QualityControlStation1.jpg")) //If postImage() == false, then defect product -> false execution
+                        opRes.setValue(0); //This is supposed to be the controler for the success of execute skill operation
                     break;
                 case "QualityControlStation2": /*TBD*/ 
-                    postImage("images/QualityControlStation2.jpg");
+                    if(!postImage("images/QualityControlStation2.jpg"))
+                       opRes.setValue(0);
                     break;
             }
         }
-
+        opRes.setValue(0); //TODO @AMARAL TIRA ISTO PARA ELE DEIXAR DE DIZER QUE TODAS AS AÇOES ESTÂO ERRADAS
         if (opRes.getValue() == 1) {
             return true;
         }
@@ -122,7 +124,7 @@ public class SimResourceLibrary implements IResource {
         return null;
     }
 
-    void postImage(String imgPath){
+    boolean postImage(String imgPath){
         String charset = "UTF-8";
         // TO DO: Add your server endpoint for the quality check
         String requestURL = "http://localhost:5000/"; //- END Point API
@@ -142,11 +144,29 @@ public class SimResourceLibrary implements IResource {
             // TO DO: For the first version simply print the response. Then, add the logic to return the result of
             // the quality test to enable the adaptation of the product's execution in case of defect.
             
+            String prediction = response.toString();            
+            String segments[] = prediction.split(":");
+            // Grab the last segment
+            prediction = segments[segments.length - 1];
+            
+            
+            if (prediction.contains("\"NOK\"")){
+                System.out.println("This product has a Defect ||| I am: " + myAgent.getLocalName());
+                return false; //This false then controls Execution skill boolean output
+            
+                
+            }
+            else if (prediction.contains("\"OK\"")){
+                System.out.println("This product seems to be alright ||| I am: " + myAgent.getLocalName());
+                return true;
+
+            }
+            
         } catch (IOException ex) {
             System.err.println(ex);
         }
 
-
+        return false;
     }
 
 
