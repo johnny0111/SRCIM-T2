@@ -76,7 +76,7 @@ public class ResourceAgent extends Agent {
 
         // TO DO: Add responder behaviour/s
 
-        //@Amaral
+ 
         //Changed to Normal From Sequential because he was getting stuck at CFP call                        
         this.addBehaviour(new CNresponder(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
         this.addBehaviour(new FIPAresponder(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));

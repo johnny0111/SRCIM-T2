@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jade.proto.AchieveREInitiator;
 
-//@HJ
+
 import Utilities.DFInteraction;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
@@ -67,9 +67,9 @@ public class ProductAgent extends Agent {
         this.quality_check = true;
         this.recovery_tried = false;
         this.request_agv = false;
-        this.ra_negotiation_done = false;   //hj: this bool is used so we can "block" the TA call until the negotiation with RA is done
-        this.transport_done = false;        //hj: this bool is used so we can "block" the execution of a Skill b4 finishing transportation
-        this.skill_done = false;            //hj: this bool is used so we can "block" the next iteration of the sequential behaviour
+        this.ra_negotiation_done = false;   // this bool is used so we can "block" the TA call until the negotiation with RA is done
+        this.transport_done = false;        // this bool is used so we can "block" the execution of a Skill b4 finishing transportation
+        this.skill_done = false;            // this bool is used so we can "block" the next iteration of the sequential behaviour
         
         //Sequência de ações prevista: Procurar recursos -> Pedir Transporte -> Pedir Execução -> (done) -> repetir até acabar a lista
         SequentialBehaviour sb = new SequentialBehaviour();
@@ -115,7 +115,7 @@ public class ProductAgent extends Agent {
             
             @Override
             protected void handleInform(ACLMessage inform){
-                System.out.println(myAgent.getLocalName() + ": INFORM message received. TODO Next Location: "+ inform.getContent());
+                System.out.println(myAgent.getLocalName() + ": INFORM message received. Next Location: "+ inform.getContent());
                 
                 next_location = inform.getContent();
                 

@@ -32,7 +32,7 @@ public class TransportAgent extends Agent {
     String description;
     String[] associatedSkills;
     
-    //@HJ
+    
     String initial_position, dest_position;
     boolean isAvailable;
     

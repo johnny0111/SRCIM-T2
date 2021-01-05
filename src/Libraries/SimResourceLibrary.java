@@ -86,7 +86,7 @@ public class SimResourceLibrary implements IResource {
                     break;
             }
         }
-        //opRes.setValue(0); //TODO @AMARAL TIRA ISTO PARA ELE DEIXAR DE DIZER QUE TODAS AS AÇOES ESTÂO ERRADAS
+        //opRes.setValue(0); //TODO TIRA ISTO PARA ELE DEIXAR DE DIZER QUE TODAS AS AÇOES ESTÂO ERRADAS
         if (opRes.getValue() == 1) {
             return true;
         }
